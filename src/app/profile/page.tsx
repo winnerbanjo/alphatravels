@@ -337,7 +337,7 @@ export default function ProfilePage() {
                 <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">Passport Manager</h2>
               </div>
               <div className="p-6 space-y-4">
-                {savedTravelers.map((traveler) => (
+                {travelers.map((traveler) => (
                   <div
                     key={traveler.id}
                     className="p-4 rounded-xl bg-white/50 border border-white/20"
@@ -360,12 +360,14 @@ export default function ProfilePage() {
                   </div>
                 ))}
                 <button
+                  onClick={() => setShowAddTravelerModal(true)}
                   className={cn(
                     'w-full mt-4 py-3 px-4',
                     'bg-white/50 border-2 border-dashed border-slate-300',
                     'rounded-xl text-sm font-medium text-slate-600',
                     'hover:bg-white/70 hover:border-[#1A1830] hover:text-[#1A1830]',
-                    'transition-all duration-200 tracking-tight'
+                    'transition-all duration-200 tracking-tight',
+                    'cursor-pointer'
                   )}
                 >
                   + Add Traveler
@@ -375,6 +377,242 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Add Traveler Modal */}
+      <AnimatePresence>
+        {showAddTravelerModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowAddTravelerModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 shadow-2xl max-w-md w-full"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">Add Traveler</h2>
+                <button
+                  onClick={() => setShowAddTravelerModal(false)}
+                  className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2 tracking-tight">Full Name</label>
+                  <input
+                    type="text"
+                    value={newTraveler.name}
+                    onChange={(e) => setNewTraveler({ ...newTraveler, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-sm tracking-tight focus:outline-none focus:ring-2 focus:ring-[#1A1830]/20"
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2 tracking-tight">Passport Number</label>
+                  <input
+                    type="text"
+                    value={newTraveler.passport}
+                    onChange={(e) => setNewTraveler({ ...newTraveler, passport: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-sm tracking-tight font-mono focus:outline-none focus:ring-2 focus:ring-[#1A1830]/20"
+                    placeholder="A12345678"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2 tracking-tight">Nationality</label>
+                  <select
+                    value={newTraveler.nationality}
+                    onChange={(e) => setNewTraveler({ ...newTraveler, nationality: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-sm tracking-tight focus:outline-none focus:ring-2 focus:ring-[#1A1830]/20"
+                  >
+                    <option>Nigerian</option>
+                    <option>Ghanaian</option>
+                    <option>British</option>
+                    <option>American</option>
+                    <option>Canadian</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2 tracking-tight">Expiry Date</label>
+                  <input
+                    type="date"
+                    value={newTraveler.expiryDate}
+                    onChange={(e) => setNewTraveler({ ...newTraveler, expiryDate: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-sm tracking-tight focus:outline-none focus:ring-2 focus:ring-[#1A1830]/20"
+                  />
+                </div>
+                <button
+                  onClick={handleAddTraveler}
+                  className={cn(
+                    'w-full px-6 py-3 bg-gradient-to-r from-[#1A1830] to-[#2A2540] text-white',
+                    'rounded-xl font-medium text-sm tracking-tight',
+                    'hover:opacity-90 transition-all duration-200',
+                    'shadow-lg cursor-pointer'
+                  )}
+                >
+                  Save Traveler
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* E-Ticket Modal */}
+      <AnimatePresence>
+        {showTicketModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowTicketModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 shadow-2xl max-w-2xl w-full"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">E-Ticket</h2>
+                <button
+                  onClick={() => setShowTicketModal(false)}
+                  className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+              <div className="space-y-6">
+                <div className="p-6 rounded-2xl border-2 border-[#1A1830]/20 bg-gradient-to-br from-[#1A1830]/5 to-white/50">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1 tracking-tight">Booking Reference</p>
+                      <p className="text-2xl font-bold text-[#1A1830] font-mono tracking-tight">{activeTrip.pnr}</p>
+                    </div>
+                    <span className="px-4 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full tracking-tight">
+                      {activeTrip.status}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/20">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2 tracking-tight">Route</p>
+                      <p className="text-lg font-semibold text-[#1A1830] tracking-tight">{activeTrip.route}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2 tracking-tight">Flight Number</p>
+                      <p className="text-lg font-semibold text-[#1A1830] tracking-tight">{activeTrip.flightNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2 tracking-tight">Departure</p>
+                      <p className="text-sm font-medium text-[#1A1830] tracking-tight">{activeTrip.departureTime}</p>
+                      <p className="text-xs text-slate-600 tracking-tight">{activeTrip.origin}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2 tracking-tight">Arrival</p>
+                      <p className="text-sm font-medium text-[#1A1830] tracking-tight">{activeTrip.arrivalTime}</p>
+                      <p className="text-xs text-slate-600 tracking-tight">{activeTrip.destination}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2 tracking-tight">Date</p>
+                      <p className="text-sm font-medium text-[#1A1830] tracking-tight">{activeTrip.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2 tracking-tight">Passengers</p>
+                      <p className="text-sm font-medium text-[#1A1830] tracking-tight">{activeTrip.passengers}</p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowTicketModal(false)}
+                  className={cn(
+                    'w-full px-6 py-3 bg-gradient-to-r from-[#1A1830] to-[#2A2540] text-white',
+                    'rounded-xl font-medium text-sm tracking-tight',
+                    'hover:opacity-90 transition-all duration-200',
+                    'shadow-lg cursor-pointer'
+                  )}
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Trip Summary Modal */}
+      <AnimatePresence>
+        {showTripSummary && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowTripSummary(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 shadow-2xl max-w-lg w-full"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">Trip Summary</h2>
+                <button
+                  onClick={() => setShowTripSummary(null)}
+                  className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+              {recentHistory
+                .filter((trip) => trip.id === showTripSummary)
+                .map((trip) => (
+                  <div key={trip.id} className="space-y-4">
+                    <div className="p-6 rounded-2xl border-2 border-[#1A1830]/20 bg-gradient-to-br from-[#1A1830]/5 to-white/50">
+                      <div className="flex items-center gap-3 mb-4">
+                        <MapPin className="w-6 h-6 text-[#1A1830]" />
+                        <h3 className="text-xl font-semibold text-[#1A1830] tracking-tight">{trip.route}</h3>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-600 tracking-tight">Date</span>
+                          <span className="text-sm font-medium text-[#1A1830] tracking-tight">{trip.date}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-600 tracking-tight">Status</span>
+                          <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full tracking-tight">
+                            {trip.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowTripSummary(null)}
+                      className={cn(
+                        'w-full px-6 py-3 bg-gradient-to-r from-[#1A1830] to-[#2A2540] text-white',
+                        'rounded-xl font-medium text-sm tracking-tight',
+                        'hover:opacity-90 transition-all duration-200',
+                        'shadow-lg cursor-pointer'
+                      )}
+                    >
+                      Close
+                    </button>
+                  </div>
+                ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

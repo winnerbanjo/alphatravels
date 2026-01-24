@@ -66,3 +66,7 @@ body {
     0 4px 16px rgba(26, 24, 48, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
+
+.bg-gradient-radial {
+  background: radial-gradient(circle at top right, #f0fdf4, #ffffff);
+}

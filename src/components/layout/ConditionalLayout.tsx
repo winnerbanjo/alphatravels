@@ -11,9 +11,10 @@ export default function ConditionalLayout({
 }) {
   const pathname = usePathname();
   const isAdminOrMerchant = pathname?.startsWith('/admin') || pathname?.startsWith('/merchant');
+  const isNileBooking = pathname?.startsWith('/nile-booking');
 
-  if (isAdminOrMerchant) {
-    // Admin/Merchant pages use their own navigation (no header/footer)
+  if (isAdminOrMerchant || isNileBooking) {
+    // Admin/Merchant/Nile Booking pages use their own navigation (no header/footer)
     return <>{children}</>;
   }
 

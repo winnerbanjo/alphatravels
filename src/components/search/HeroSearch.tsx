@@ -24,11 +24,6 @@ export default function HeroSearch() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Flight Search Intent:', {
-      origin: searchParams.origin.toUpperCase(),
-      destination: searchParams.destination.toUpperCase(),
-      departureDate: searchParams.departureDate,
-    });
   };
 
   // Get today's date in YYYY-MM-DD format for min date

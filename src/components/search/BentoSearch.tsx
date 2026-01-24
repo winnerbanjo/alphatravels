@@ -107,21 +107,9 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
         const response = await fetch(`/api/flights/search?${params.toString()}`);
         const data = await response.json();
         
-        // Log results to console
-        console.log('🔍 Flight Search Results:', {
-          success: response.ok,
-          data: data,
-          searchParams: {
-            origin: flightData.origin.toUpperCase(),
-            destination: flightData.destination.toUpperCase(),
-            departureDate: flightData.departureDate,
-          }
-        });
-        
         if (response.ok && data.success) {
           // Store flight offers in state
           if (data.data && Array.isArray(data.data)) {
-            console.log(`✅ Found ${data.data.length} flight offers`);
             // Add unique IDs to each offer
             const offersWithIds = data.data.map((offer: any, index: number) => ({
               ...offer,
@@ -129,20 +117,13 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
             }));
             setFlightResults(offersWithIds);
             setBookingStep('select'); // Move to select step
-            
-            // Log each flight offer
-            offersWithIds.forEach((offer: FlightOffer, index: number) => {
-              console.log(`Flight ${index + 1}:`, offer);
-            });
           }
         } else {
-          console.warn('⚠️ API returned error:', data);
           setFlightResults([]);
         }
-      } catch (error) {
-        console.error('❌ Flight search error:', error);
-        setFlightResults([]);
-      } finally {
+        } catch (error) {
+          setFlightResults([]);
+        } finally {
         setIsSearching(false);
       }
     } else if (activeTab === 'hotels') {
@@ -258,7 +239,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
             setFlightResults([]);
           }
         } catch (error) {
-          console.error('❌ Quick search error:', error);
           setFlightResults([]);
         } finally {
           setIsSearching(false);
@@ -758,7 +738,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                   key={offer.id}
                   offer={offer}
                   onSelect={async () => {
-                    console.log('Selected flight:', offer);
                     setSelectedFlight(offer);
                     setIsPricing(true);
                     setBookingStep('select'); // Keep on select step to show summary
@@ -775,14 +754,11 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                       if (priceData.success) {
                         setConfirmedPrice(priceData.data.flightOffers?.[0] || offer);
                         setIsPriceVerified(true);
-                        console.log('✅ Price confirmed:', priceData);
                       } else {
-                        console.warn('⚠️ Price confirmation failed, using original offer');
                         setConfirmedPrice(offer);
                         setIsPriceVerified(false);
                       }
                     } catch (error) {
-                      console.error('❌ Price confirmation error:', error);
                       setConfirmedPrice(offer);
                       setIsPriceVerified(false);
                     } finally {
@@ -855,21 +831,14 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                           if (bookingRef) {
                             localStorage.setItem('bookingReference', bookingRef);
                           }
-                          console.log('✅ Booking confirmed! PNR:', pnrCode, 'Reference:', bookingRef);
-                          
-                          // Store both in localStorage
-                          localStorage.setItem('bookingPnr', pnrCode);
-                          localStorage.setItem('bookingReference', bookingRef);
                           
                           // Redirect to success page with both references
                           router.push(`/booking/success?pnr=${pnrCode}&ref=${bookingRef}`);
                         } else {
-                          console.error('❌ Booking failed:', bookingData);
                           alert('Booking failed. Please try again.');
                           setIsBooking(false);
                         }
                       } catch (error) {
-                        console.error('❌ Booking error:', error);
                         alert('An error occurred. Please try again.');
                         setIsBooking(false);
                       }
