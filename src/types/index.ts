@@ -40,3 +40,19 @@ export interface Segment {
   };
   duration: string;
 }
+
+export interface Travelers {
+  adults: number;
+  children: number;
+  infants: number;
+}
+
+export interface BookingSummaryProps {
+  flightOffer: FlightOffer | null;
+  travelers: Travelers;
+  destinationImage?: string;
+  destinationName?: string;
+  isVisible: boolean;
+  isPriceVerified?: boolean;
+  onClose?: () => void;
+}

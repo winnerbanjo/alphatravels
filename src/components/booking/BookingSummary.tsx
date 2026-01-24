@@ -30,7 +30,7 @@ interface Travelers {
   infants: number;
 }
 
-interface BookingSummaryProps {
+export interface BookingSummaryProps {
   flightOffer: FlightOffer | null;
   travelers: Travelers;
   destinationImage?: string;
