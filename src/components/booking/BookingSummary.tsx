@@ -37,6 +37,7 @@ interface BookingSummaryProps {
   destinationName?: string;
   isVisible: boolean;
   isPriceVerified?: boolean;
+  onClose?: () => void;
 }
 
 export default function BookingSummary({
@@ -46,6 +47,7 @@ export default function BookingSummary({
   destinationName,
   isVisible,
   isPriceVerified = false,
+  onClose,
 }: BookingSummaryProps) {
   if (!flightOffer) return null;
 
@@ -104,6 +106,27 @@ export default function BookingSummary({
         >
           {/* Destination Preview */}
           <div className="relative h-48 overflow-hidden">
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
+                aria-label="Close booking summary"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
             <img
               src={destinationImg}
               alt={destination}
