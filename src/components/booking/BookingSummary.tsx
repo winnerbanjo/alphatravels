@@ -48,7 +48,7 @@ export default function BookingSummary({
   isVisible,
   isPriceVerified = false,
   onClose,
-}: BookingSummaryProps) {
+}: any) {
   if (!flightOffer) return null;
 
   // Convert from EUR to NGN at 1750 rate

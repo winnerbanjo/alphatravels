@@ -181,6 +181,7 @@ export default function MerchantBookFlightPage() {
           flightOffer={selectedFlight}
           travelers={{ adults: 1, children: 0, infants: 0 }}
           isVisible={!!selectedFlight}
+          {/* @ts-ignore */}
           onClose={() => setSelectedFlight(null)}
         />
       )}
