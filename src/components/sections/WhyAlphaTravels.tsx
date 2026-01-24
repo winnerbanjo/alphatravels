@@ -1,6 +1,6 @@
 'use client';
 
-import { Award, Globe, HeadphonesIcon } from 'lucide-react';
+import { Award, Globe, Headphones } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 const features = [
@@ -17,7 +17,7 @@ const features = [
       'Connect to destinations across 190+ countries with our extensive network.',
   },
   {
-    icon: HeadphonesIcon,
+    icon: Headphones,
     title: '24/7 Support',
     description:
       'Round-the-clock assistance whenever you need it, wherever you are.',

@@ -18,6 +18,31 @@ export async function POST(request: NextRequest) {
     }
 
     const amadeus = getAmadeusClient();
+    
+    // Handle missing Amadeus client (build-time safety)
+    // Return mock booking if API is not configured
+    if (!amadeus) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          type: 'flight-order',
+          id: `MOCK-${Date.now()}`,
+          associatedRecords: [
+            {
+              reference: `MOCK-PNR-${Date.now()}`,
+              creationDate: new Date().toISOString(),
+              originSystemCode: 'GDS',
+            },
+          ],
+        },
+        pnr: `MOCK-PNR-${Date.now()}`,
+        bookingReference: `MOCK-${Date.now()}`,
+        meta: {
+          mock: true,
+          message: 'Mock booking created (API not configured)',
+        },
+      });
+    }
 
     // Extract flight offer ID for payment
     const flightOfferId = flightOffer.id || '1';

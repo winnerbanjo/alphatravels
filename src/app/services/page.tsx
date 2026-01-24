@@ -2,15 +2,39 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { Visa, GraduationCap, Briefcase, Truck, ChevronDown, CheckCircle } from 'lucide-react';
+import { FileCheck, GraduationCap, Briefcase, Truck, ChevronDown, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/src/lib/utils';
+
+// Framer Motion Variants - Defined at top level to prevent ReferenceErrors
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+      damping: 12,
+    },
+  },
+};
 
 type ServiceTab = 'visa' | 'education' | 'business' | 'logistics';
 
 const services = {
   visa: {
-    icon: Visa,
+    icon: FileCheck,
     title: 'Visa Services',
     description: 'Comprehensive visa assistance for UK, USA, and Canada',
     content: {

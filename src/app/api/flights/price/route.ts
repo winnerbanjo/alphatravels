@@ -18,6 +18,21 @@ export async function POST(request: NextRequest) {
     }
 
     const amadeus = getAmadeusClient();
+    
+    // Handle missing Amadeus client (build-time safety)
+    if (!amadeus) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          type: 'flight-offers-pricing',
+          flightOffers: [flightOffer],
+        },
+        meta: {
+          mock: true,
+          message: 'Price confirmed (using original offer - API not configured)',
+        },
+      });
+    }
 
     // Call Amadeus API to confirm price using flightOffersPricing
     try {

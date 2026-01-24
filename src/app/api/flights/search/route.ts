@@ -47,6 +47,18 @@ export async function GET(request: NextRequest) {
     }
 
     const amadeus = getAmadeusClient();
+    
+    // Handle missing Amadeus client (build-time safety)
+    if (!amadeus) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Amadeus API not configured',
+          message: 'Flight search is temporarily unavailable. Please try again later.',
+        },
+        { status: 503 }
+      );
+    }
 
     // Build request parameters
     const params: any = {
