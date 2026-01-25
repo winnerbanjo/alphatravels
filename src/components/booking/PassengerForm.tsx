@@ -75,11 +75,11 @@ export default function PassengerForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8 px-4 md:px-0">
       {/* Contact Information */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6">
         <h3 className="text-xl font-bold text-[#1A1830] mb-6">Contact Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-[#1A1830] mb-2">
               First Name
@@ -91,7 +91,7 @@ export default function PassengerForm({
                 required
                 value={contacts.firstName}
                 onChange={(e) => handleContactChange('firstName', e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
               />
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function PassengerForm({
                 required
                 value={contacts.lastName}
                 onChange={(e) => handleContactChange('lastName', e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
               />
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function PassengerForm({
                 required
                 value={contacts.emailAddress}
                 onChange={(e) => handleContactChange('emailAddress', e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
               />
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function PassengerForm({
               <select
                 value={contacts.countryCallingCode}
                 onChange={(e) => handleContactChange('countryCallingCode', e.target.value)}
-                className="w-24 px-3 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent bg-white"
+                className="w-24 h-12 md:h-14 px-3 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent bg-white"
               >
                 <option value="234">+234</option>
                 <option value="1">+1</option>
@@ -148,7 +148,7 @@ export default function PassengerForm({
                   required
                   value={contacts.phoneNumber}
                   onChange={(e) => handleContactChange('phoneNumber', e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 />
               </div>
             </div>
@@ -158,11 +158,11 @@ export default function PassengerForm({
 
       {/* Passenger Details */}
       {passengers.map((passenger, index) => (
-        <div key={index} className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div key={index} className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6">
           <h3 className="text-xl font-bold text-[#1A1830] mb-6">
             Passenger {index + 1} Details
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-[#1A1830] mb-2">
                 First Name
@@ -176,7 +176,7 @@ export default function PassengerForm({
                   onChange={(e) =>
                     handlePassengerChange(index, 'firstName', e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 />
               </div>
             </div>
@@ -193,7 +193,7 @@ export default function PassengerForm({
                   onChange={(e) =>
                     handlePassengerChange(index, 'lastName', e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 />
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function PassengerForm({
                   onChange={(e) =>
                     handlePassengerChange(index, 'dateOfBirth', e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 />
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function PassengerForm({
                 onChange={(e) =>
                   handlePassengerChange(index, 'gender', e.target.value as 'MALE' | 'FEMALE')
                 }
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                className="w-full h-12 md:h-14 px-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
               >
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
@@ -240,7 +240,7 @@ export default function PassengerForm({
                   onChange={(e) =>
                     handlePassengerChange(index, 'nationality', e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 >
                   <option value="NG">Nigeria</option>
                   <option value="US">United States</option>
@@ -260,7 +260,7 @@ export default function PassengerForm({
                   onChange={(e) =>
                     handlePassengerChange(index, 'passportNumber', e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 />
               </div>
             </div>
@@ -276,7 +276,7 @@ export default function PassengerForm({
                   onChange={(e) =>
                     handlePassengerChange(index, 'passportExpiry', e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+                  className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
                 />
               </div>
             </div>

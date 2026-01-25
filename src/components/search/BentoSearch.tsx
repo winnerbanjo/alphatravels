@@ -53,9 +53,9 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
   const [pnr, setPnr] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SearchTab>('flights');
   const [flightData, setFlightData] = useState({
-    origin: '',
-    destination: '',
-    departureDate: '',
+    origin: 'LOS', // Default: Lagos
+    destination: 'DXB', // Default: Dubai
+    departureDate: '2026-03-15', // Sandbox date
     class: 'economy',
   });
   const [travelers, setTravelers] = useState({
@@ -90,9 +90,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
         return;
       }
 
-      setIsSearching(true);
-      setFlightResults([]); // Clear previous results
-      
       // Force valid date for Sandbox (2026-03-15 if empty or past)
       const SANDBOX_DATE = '2026-03-15';
       const today = new Date().toISOString().split('T')[0];
@@ -100,50 +97,17 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
         ? flightData.departureDate 
         : SANDBOX_DATE;
       
-      try {
-        // Call the internal API endpoint
-        const params = new URLSearchParams({
-          origin: flightData.origin.toUpperCase(),
-          destination: flightData.destination.toUpperCase(),
-          departureDate: departureDate,
-          adults: travelers.adults.toString(),
-          children: travelers.children.toString(),
-          infants: travelers.infants.toString(),
-        });
-
-        const response = await fetch(`/api/flights/search?${params.toString()}`);
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-          // Store flight offers in state
-          if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-            // Add unique IDs to each offer
-            const offersWithIds = data.data.map((offer: any, index: number) => ({
-              ...offer,
-              id: offer.id || `flight-${index}-${Date.now()}`,
-            }));
-            setFlightResults(offersWithIds);
-            setBookingStep('select'); // Move to select step
-          } else {
-            // Fallback: Show cached demo data if API returns no results
-            const fallbackOffers = getFallbackFlightData(flightData.origin, flightData.destination);
-            setFlightResults(fallbackOffers);
-            setBookingStep('select');
-          }
-        } else {
-          // Fallback: Show cached demo data on API error
-          const fallbackOffers = getFallbackFlightData(flightData.origin, flightData.destination);
-          setFlightResults(fallbackOffers);
-          setBookingStep('select');
-        }
-        } catch (error) {
-          // Fallback: Show cached demo data on error
-          const fallbackOffers = getFallbackFlightData(flightData.origin, flightData.destination);
-          setFlightResults(fallbackOffers);
-          setBookingStep('select');
-        } finally {
-        setIsSearching(false);
-      }
+      // Redirect to flights page with search parameters
+      const params = new URLSearchParams({
+        origin: flightData.origin.toUpperCase(),
+        destination: flightData.destination.toUpperCase(),
+        departureDate: departureDate,
+        adults: travelers.adults.toString(),
+        children: travelers.children.toString(),
+        infants: travelers.infants.toString(),
+      });
+      
+      router.push(`/flights?${params.toString()}`);
     } else if (activeTab === 'hotels') {
       const params = new URLSearchParams({
         destination: hotelData.destination,
@@ -387,7 +351,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
       </div>
 
       {/* Search Form */}
-      <div className="bg-white/70 backdrop-blur-md border border-white/20 rounded-[2.5rem] p-8 md:p-12 relative shadow-2xl">
+      <div className="bg-white/70 backdrop-blur-md border border-white/20 rounded-[2.5rem] px-4 py-8 md:p-12 relative shadow-2xl">
         {/* Shimmer Loading Overlay */}
         {isSearching && (
           <div className="absolute inset-0 bg-white/70 backdrop-blur-md border border-white/20 rounded-[2.5rem] z-10 flex items-center justify-center">
@@ -412,8 +376,8 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                 : 'opacity-0 absolute pointer-events-none -translate-y-4'
             )}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   From
                 </label>
@@ -428,15 +392,15 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                         origin: e.target.value.toUpperCase().slice(0, 3),
                       })
                     }
-                    placeholder="JFK"
+                    placeholder="LOS"
                     maxLength={3}
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   To
                 </label>
@@ -451,15 +415,15 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                         destination: e.target.value.toUpperCase().slice(0, 3),
                       })
                     }
-                    placeholder="LAX"
+                    placeholder="DXB"
                     maxLength={3}
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Departure
                 </label>
@@ -473,12 +437,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     min={today}
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Travelers
                 </label>
@@ -486,7 +450,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                   <button
                     type="button"
                     onClick={() => setShowTravelersPopover(!showTravelersPopover)}
-                    className="w-full flex items-center justify-between pl-4 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium hover:border-[#3B82F6] transition-all"
+                    className="w-full h-12 md:h-14 flex items-center justify-between pl-4 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium hover:border-[#3B82F6] transition-all"
                   >
                     <div className="flex items-center gap-2">
                       <Users className="h-5 w-5 text-[#1A1830]/40" />
@@ -612,8 +576,8 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                 : 'opacity-0 absolute pointer-events-none -translate-y-4'
             )}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Destination
                 </label>
@@ -627,12 +591,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     placeholder="City or Hotel"
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Check-in
                 </label>
@@ -646,12 +610,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     min={today}
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Check-out
                 </label>
@@ -665,12 +629,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     min={hotelData.checkIn || today}
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Guests
                 </label>
@@ -684,7 +648,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     min="1"
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -700,8 +664,8 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                 : 'opacity-0 absolute pointer-events-none -translate-y-4'
             )}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Pickup Location
                 </label>
@@ -715,12 +679,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     placeholder="City or Airport"
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Drop-off Location
                 </label>
@@ -734,12 +698,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     placeholder="Same or Different"
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Date
                 </label>
@@ -753,24 +717,27 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     min={today}
                     required
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   Time
                 </label>
-                <input
-                  type="time"
-                  value={carData.time}
-                  onChange={(e) =>
-                    setCarData({ ...carData, time: e.target.value })
-                  }
-                  required
-                  className="w-full pl-4 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
-                />
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1A1830]/40 pointer-events-none" />
+                  <input
+                    type="time"
+                    value={carData.time}
+                    onChange={(e) =>
+                      setCarData({ ...carData, time: e.target.value })
+                    }
+                    required
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                  />
+                </div>
               </div>
             </div>
           </div>

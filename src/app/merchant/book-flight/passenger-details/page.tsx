@@ -112,7 +112,7 @@ function PassengerDetailsContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl border border-slate-200 shadow-xl p-8"
+              className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 md:p-8"
             >
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-[#1A1830] mb-2">Alpha Standard Fields</h2>
@@ -133,7 +133,7 @@ function PassengerDetailsContent() {
                       value={passenger.fullName}
                       onChange={(e) => handleChange('fullName', e.target.value)}
                       placeholder="Enter full name exactly as shown on passport"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#1A1830] focus:border-transparent transition-all"
+                      className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-[#1A1830] focus:border-transparent transition-all"
                     />
                   </div>
                 </div>

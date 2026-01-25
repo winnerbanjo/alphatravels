@@ -290,17 +290,19 @@ function FlightsPageContent() {
   useEffect(() => {
     const destination = urlSearchParams.get('destination');
     const origin = urlSearchParams.get('origin') || 'LOS';
+    const departureDateParam = urlSearchParams.get('departureDate');
     
     if (destination && !hasSearched) {
-      // Use Sandbox date for best compatibility
+      // Use date from URL or default to Sandbox date
+      const searchDate = departureDateParam || SANDBOX_DATE;
       setSearchParams({
         origin: origin,
         destination: destination,
-        departureDate: SANDBOX_DATE,
+        departureDate: searchDate,
         returnDate: '',
       });
       // Trigger search automatically
-      handleSearch(origin, destination, SANDBOX_DATE, '');
+      handleSearch(origin, destination, searchDate, '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlSearchParams]);
@@ -334,9 +336,9 @@ function FlightsPageContent() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto"
+            className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl px-4 py-8 md:p-8 max-w-4xl mx-auto"
           >
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex flex-col md:grid md:grid-cols-4 gap-4">
               <div className="relative">
                 <label className="block text-xs font-medium text-[#1A1830]/60 mb-2 uppercase tracking-wider">
                   From
@@ -354,7 +356,7 @@ function FlightsPageContent() {
                     }
                     placeholder="LOS"
                     maxLength={3}
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -376,7 +378,7 @@ function FlightsPageContent() {
                     }
                     placeholder="Anywhere"
                     maxLength={3}
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
+                    className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
