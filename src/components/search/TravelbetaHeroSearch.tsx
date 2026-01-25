@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Calendar, Users, ArrowUpDown, ChevronRight } from 'lucide-react';
+import { MapPin, Calendar, Users, ArrowUpDown, ChevronRight, Plane } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 export default function TravelbetaHeroSearch() {
-  const [tripType, setTripType] = useState<'round' | 'oneway'>('round');
+  const [tripType, setTripType] = useState<'round' | 'oneway' | 'multicity'>('round');
   const [passengers, setPassengers] = useState('1');
   const [cabinClass, setCabinClass] = useState('Economy');
   
@@ -44,8 +44,8 @@ export default function TravelbetaHeroSearch() {
       <div className="bg-[#000080] rounded-2xl shadow-2xl overflow-hidden">
         {/* Top Row - Toggles */}
         <div className="px-6 pt-6 pb-4 flex flex-wrap items-center gap-4 text-white">
-          {/* Round Trip Toggle */}
-          <div className="flex items-center gap-2">
+          {/* Round Trip Toggle - Desktop */}
+          <div className="hidden md:flex items-center gap-2">
             <button
               type="button"
               onClick={() => setTripType('round')}
@@ -69,6 +69,46 @@ export default function TravelbetaHeroSearch() {
               )}
             >
               One Way
+            </button>
+          </div>
+
+          {/* Mobile Toggles - Round Trip, One Way, Multi-city */}
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTripType('round')}
+              className={cn(
+                'px-3 py-1.5 rounded-sm text-xs font-medium transition-all',
+                tripType === 'round'
+                  ? 'bg-white text-[#000080]'
+                  : 'bg-transparent text-white'
+              )}
+            >
+              ROUND TRIP
+            </button>
+            <button
+              type="button"
+              onClick={() => setTripType('oneway')}
+              className={cn(
+                'px-3 py-1.5 rounded-sm text-xs font-medium transition-all',
+                tripType === 'oneway'
+                  ? 'bg-white text-[#000080]'
+                  : 'bg-transparent text-white'
+              )}
+            >
+              ONE WAY
+            </button>
+            <button
+              type="button"
+              onClick={() => setTripType('multicity')}
+              className={cn(
+                'px-3 py-1.5 rounded-sm text-xs font-medium transition-all',
+                tripType === 'multicity'
+                  ? 'bg-white text-[#000080]'
+                  : 'bg-transparent text-white'
+              )}
+            >
+              MULTI-CITY
             </button>
           </div>
 
@@ -202,13 +242,13 @@ export default function TravelbetaHeroSearch() {
                 From
               </label>
               <div className="relative">
-                <MapPin className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Plane className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
                   value={searchParams.from}
                   onChange={(e) => handleInputChange('from', e.target.value)}
                   placeholder="Enter City"
-                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm placeholder-slate-400"
+                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold placeholder-slate-400"
                 />
               </div>
             </div>
@@ -237,7 +277,7 @@ export default function TravelbetaHeroSearch() {
                   value={searchParams.to}
                   onChange={(e) => handleInputChange('to', e.target.value)}
                   placeholder="Enter City"
-                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm placeholder-slate-400"
+                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold placeholder-slate-400"
                 />
               </div>
             </div>
@@ -256,7 +296,7 @@ export default function TravelbetaHeroSearch() {
                     value={searchParams.departure}
                     onChange={(e) => handleInputChange('departure', e.target.value)}
                     min={today}
-                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm"
+                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold"
                   />
                 </div>
               </div>
@@ -274,7 +314,7 @@ export default function TravelbetaHeroSearch() {
                       value={searchParams.return}
                       onChange={(e) => handleInputChange('return', e.target.value)}
                       min={searchParams.departure || today}
-                      className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm"
+                      className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold"
                     />
                   </div>
                 </div>
@@ -285,38 +325,43 @@ export default function TravelbetaHeroSearch() {
             <div className="grid grid-cols-2 gap-4">
               {/* Passengers */}
               <div className="bg-white rounded-sm p-4">
-                <label className="block text-xs font-medium text-slate-600 mb-2">
-                  Passengers
-                </label>
                 <div className="relative">
-                  <Users className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <select
                     value={passengers}
                     onChange={(e) => setPassengers(e.target.value)}
-                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm appearance-none"
+                    className="w-full pl-2 pr-8 py-2 bg-white text-black border-none outline-none text-sm font-semibold appearance-none"
                   >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
+                    <option value="1">1 Passenger</option>
+                    <option value="2">2 Passengers</option>
+                    <option value="3">3 Passengers</option>
+                    <option value="4">4 Passengers</option>
                   </select>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
               </div>
 
               {/* Class */}
               <div className="bg-white rounded-sm p-4">
-                <label className="block text-xs font-medium text-slate-600 mb-2">
-                  Class
-                </label>
-                <select
-                  value={cabinClass}
-                  onChange={(e) => setCabinClass(e.target.value)}
-                  className="w-full pl-2 pr-2 py-2 bg-white text-black border-none outline-none text-sm appearance-none"
-                >
-                  <option value="Economy">Economy</option>
-                  <option value="Business">Business</option>
-                  <option value="First">First</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={cabinClass}
+                    onChange={(e) => setCabinClass(e.target.value)}
+                    className="w-full pl-2 pr-8 py-2 bg-white text-black border-none outline-none text-sm font-semibold appearance-none"
+                  >
+                    <option value="Economy">Economy</option>
+                    <option value="Business">Business</option>
+                    <option value="First">First</option>
+                  </select>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
 
