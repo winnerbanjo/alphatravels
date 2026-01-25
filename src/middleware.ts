@@ -27,47 +27,44 @@ export function middleware(request: NextRequest) {
   const emailFromCookie = userEmail?.value || '';
   const emailFromHeader = adminEmail || '';
 
-  // CRITICAL: If founder email is detected anywhere, allow access immediately
-  // This is the HIGHEST PRIORITY check - founder NEVER gets blocked
-  const isFounderEmailDetected = emailFromCookie === 'oyekunle@alpha.com' || 
-                                  emailFromHeader === 'oyekunle@alpha.com';
-  
-  if (isFounderEmailDetected && pathname.startsWith('/admin')) {
+  // CRITICAL: Hard-fix Super Admin Access - Founder email bypass (HIGHEST PRIORITY)
+  // This ensures oyekunle@alpha.com NEVER gets blocked, even without cookies
+  const founderEmail = emailFromCookie || emailFromHeader;
+  if (founderEmail === 'oyekunle@alpha.com' && pathname.startsWith('/admin')) {
     // Founder bypass - allow all admin routes immediately
-      // Set founder cookies if not already set
-      const response = NextResponse.next();
-      if (!sessionToken) {
-        response.cookies.set('admin_session', `founder_session_${Date.now()}`, {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
-          path: '/',
-        });
-        response.cookies.set('admin_user_id', 'founder-001', {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
-          path: '/',
-        });
-        response.cookies.set('admin_user_email', 'oyekunle@alpha.com', {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
-          path: '/',
-        });
-        response.cookies.set('admin_user_role', 'SUPER_ADMIN', {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
-          path: '/',
-        });
-      }
-      return response;
+    const response = NextResponse.next();
+    // Set founder cookies if not already set
+    if (!sessionToken) {
+      response.cookies.set('admin_session', `founder_session_${Date.now()}`, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      response.cookies.set('admin_user_id', 'founder-001', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      response.cookies.set('admin_user_email', 'oyekunle@alpha.com', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      response.cookies.set('admin_user_role', 'SUPER_ADMIN', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
     }
+    return response;
   }
 
   // Protect admin routes

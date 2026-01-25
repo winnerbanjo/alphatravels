@@ -182,6 +182,7 @@ export default function MerchantBookFlightPage() {
         <BookingSummary 
           flightOffer={selectedFlight}
           travelers={{ adults: 1, children: 0, infants: 0 }}
+          isVisible={!!selectedFlight}
           onClose={() => setSelectedFlight(null)} 
         />
       )}
