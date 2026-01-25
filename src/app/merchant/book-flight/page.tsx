@@ -177,7 +177,11 @@ export default function MerchantBookFlightPage() {
 
       {/* Booking Summary Sidebar */}
       {selectedFlight && (
-        <BookingSummary flightOffer={selectedFlight} travelers={{ adults: 1, children: 0, infants: 0 }} onClose={() => setSelectedFlight(null)} />
+        <BookingSummary 
+          flightOffer={selectedFlight}
+          travelers={{ adults: 1, children: 0, infants: 0 }}
+          onClose={() => setSelectedFlight(null)} 
+        />
       )}
     </div>
   );
