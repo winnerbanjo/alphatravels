@@ -369,7 +369,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
             </div>
           </div>
         )}
-        <form onSubmit={handleSearch}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSearch(e); }}>
           {/* Flights Tab */}
           <div
             className={cn(
@@ -745,7 +745,8 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
           {/* Search Button */}
           <div className="mt-8 flex justify-center">
             <button
-              type="submit"
+              type="button"
+              onClick={handleSearch}
               disabled={isSearching}
               className={cn(
                 'inline-flex items-center gap-2',

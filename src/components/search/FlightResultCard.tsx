@@ -25,11 +25,9 @@ const getAirlineName = (carrierCode: string | undefined): string => {
 
 const getAirlineLogoUrl = (carrierCode: string | undefined): string => {
   if (!carrierCode) return '';
-  const airlineName = AIRLINE_NAMES[carrierCode];
-  if (!airlineName) return '';
-  // Use logo.dev service - format: https://img.logo.dev/airline_code.com
-  const domain = airlineName.toLowerCase().replace(/\s+/g, '');
-  return `https://img.logo.dev/${domain}.com`;
+  // Use Google's airline logos API (more reliable)
+  // Format: https://www.gstatic.com/flights/airline_logos/70px/{IATA}.png
+  return `https://www.gstatic.com/flights/airline_logos/70px/${carrierCode}.png`;
 };
 
 interface FlightSegment {
