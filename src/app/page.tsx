@@ -36,24 +36,24 @@ export default function Home() {
       className="bg-white min-h-screen"
     >
       {/* Hero Section - Restored Original */}
-      <section className="relative pt-40 pb-40 px-8 overflow-hidden">
-        {/* Hero Background Image - Original travel concept */}
-        <div className="absolute inset-0 z-0">
+      <section className="relative pt-40 px-4 sm:px-8">
+        {/* Hero Background Image - Original travel concept - Extends to cover all content */}
+        <div className="absolute inset-0 z-0 rounded-[2.5rem] overflow-hidden">
           <Image
             src="/travel-concept-with-landmarks.jpg"
             alt="Elite travel concept with landmarks"
             fill
             priority
-            className="object-cover rounded-[2.5rem]"
+            className="object-cover"
           />
-          <div className="absolute inset-0 bg-[#1A1830]/75 backdrop-brightness-50 rounded-[2.5rem]" />
+          <div className="absolute inset-0 bg-[#1A1830]/75 backdrop-brightness-50" />
         </div>
-        <div className="relative z-10 mx-auto max-w-7xl pt-32">
+        <div className="relative z-10 mx-auto max-w-7xl pt-32 pb-12 md:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center mb-20 space-y-8"
+            className="text-center mb-12 md:mb-20 space-y-8"
           >
             <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tighter leading-none drop-shadow-lg">
               Elite African{' '}
@@ -77,12 +77,12 @@ export default function Home() {
             </p>
           </motion.div>
 
-          {/* Search Container - Overlaps bottom of hero */}
+          {/* Search Container - Fully visible inside hero */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-16"
+            className="mt-8 md:mt-16"
           >
             <TravelbetaHeroSearch />
           </motion.div>
