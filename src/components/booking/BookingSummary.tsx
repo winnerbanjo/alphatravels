@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, CheckCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Lock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 interface FlightOffer {
@@ -41,6 +42,7 @@ export interface BookingSummaryProps {
 }
 
 export default function BookingSummary(props: any) {
+  const router = useRouter();
   const { flightOffer, travelers, destinationImage, destinationName, isVisible, isPriceVerified = false, onClose } = props;
   if (!flightOffer) return null;
 
@@ -186,6 +188,33 @@ export default function BookingSummary(props: any) {
                 <span className="text-2xl font-bold text-[#1A1830]">{formatCurrency(totalPriceNGN)}</span>
               </div>
             </div>
+
+            {/* Proceed to Passenger Details Button */}
+            <button
+              onClick={() => {
+                // Store flight data for passenger details page
+                sessionStorage.setItem('bookingFlightOffer', JSON.stringify(flightOffer));
+                sessionStorage.setItem('bookingTravelers', JSON.stringify(travelers));
+                sessionStorage.setItem('bookingDestination', destination);
+                sessionStorage.setItem('bookingTotalPrice', totalPriceNGN.toString());
+                sessionStorage.setItem('bookingDestinationImage', destinationImg);
+                
+                // Redirect to passenger details
+                router.push('/merchant/book-flight/passenger-details');
+              }}
+              className={cn(
+                'w-full py-4 bg-[#1A1830] text-white',
+                'font-bold rounded-xl',
+                'shadow-lg transition-all duration-200',
+                'hover:bg-[#1A1830]/90 hover:shadow-xl',
+                'focus:outline-none focus:ring-2 focus:ring-[#1A1830] focus:ring-offset-2',
+                'transform hover:scale-[1.02] active:scale-[0.98]',
+                'flex items-center justify-center gap-2 mb-4'
+              )}
+            >
+              Proceed to Passenger Details
+              <ArrowRight className="h-5 w-5" />
+            </button>
 
             {/* Safe & Secure Badge */}
             <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 rounded-xl border border-slate-200">
