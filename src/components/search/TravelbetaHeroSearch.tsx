@@ -72,9 +72,9 @@ export default function TravelbetaHeroSearch() {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
       {/* Navy Blue Search Container */}
-      <div className="bg-[#000080] rounded-2xl shadow-2xl overflow-hidden">
+      <div className="bg-[#000080] rounded-2xl shadow-2xl overflow-hidden w-[92%] md:w-full mx-auto">
         {/* Top Row - Toggles */}
         <div className="px-6 pt-6 pb-4 flex flex-wrap items-center gap-4 text-white">
           {/* Round Trip Toggle - Desktop */}
@@ -191,7 +191,7 @@ export default function TravelbetaHeroSearch() {
                     value={searchParams.from}
                     onChange={(e) => handleInputChange('from', e.target.value)}
                     placeholder="Enter City"
-                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm placeholder-slate-400"
+                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base placeholder-slate-400"
                   />
                 </div>
               </div>
@@ -210,7 +210,7 @@ export default function TravelbetaHeroSearch() {
                     value={searchParams.to}
                     onChange={(e) => handleInputChange('to', e.target.value)}
                     placeholder="Enter City"
-                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm placeholder-slate-400"
+                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base placeholder-slate-400"
                   />
                 </div>
               </div>
@@ -229,7 +229,7 @@ export default function TravelbetaHeroSearch() {
                     value={searchParams.departure}
                     onChange={(e) => handleInputChange('departure', e.target.value)}
                     min={today}
-                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm"
+                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base"
                   />
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default function TravelbetaHeroSearch() {
                       value={searchParams.return}
                       onChange={(e) => handleInputChange('return', e.target.value)}
                       min={searchParams.departure || today}
-                      className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm"
+                      className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base"
                     />
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function TravelbetaHeroSearch() {
                   value={searchParams.from}
                   onChange={(e) => handleInputChange('from', e.target.value)}
                   placeholder="Enter City"
-                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold placeholder-slate-400"
+                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base font-semibold placeholder-slate-400"
                 />
               </div>
             </div>
@@ -310,7 +310,7 @@ export default function TravelbetaHeroSearch() {
                   value={searchParams.to}
                   onChange={(e) => handleInputChange('to', e.target.value)}
                   placeholder="Enter City"
-                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold placeholder-slate-400"
+                  className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base font-semibold placeholder-slate-400"
                 />
               </div>
             </div>
@@ -329,7 +329,7 @@ export default function TravelbetaHeroSearch() {
                     value={searchParams.departure}
                     onChange={(e) => handleInputChange('departure', e.target.value)}
                     min={today}
-                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold"
+                    className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base font-semibold"
                   />
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function TravelbetaHeroSearch() {
                       value={searchParams.return}
                       onChange={(e) => handleInputChange('return', e.target.value)}
                       min={searchParams.departure || today}
-                      className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-sm font-semibold"
+                      className="w-full pl-6 pr-2 py-2 bg-white text-black border-none outline-none text-base font-semibold"
                     />
                   </div>
                 </div>
@@ -362,7 +362,7 @@ export default function TravelbetaHeroSearch() {
                   <select
                     value={passengers}
                     onChange={(e) => setPassengers(e.target.value)}
-                    className="w-full pl-2 pr-8 py-2 bg-white text-black border-none outline-none text-sm font-semibold appearance-none"
+                    className="w-full pl-2 pr-8 py-2 bg-white text-black border-none outline-none text-base font-semibold appearance-none"
                   >
                     <option value="1">1 Passenger</option>
                     <option value="2">2 Passengers</option>
@@ -383,7 +383,7 @@ export default function TravelbetaHeroSearch() {
                   <select
                     value={cabinClass}
                     onChange={(e) => setCabinClass(e.target.value)}
-                    className="w-full pl-2 pr-8 py-2 bg-white text-black border-none outline-none text-sm font-semibold appearance-none"
+                    className="w-full pl-2 pr-8 py-2 bg-white text-black border-none outline-none text-base font-semibold appearance-none"
                   >
                     <option value="Economy">Economy</option>
                     <option value="Business">Business</option>
