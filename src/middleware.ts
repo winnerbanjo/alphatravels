@@ -19,18 +19,66 @@ const ADMIN_EMAILS = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // EMERGENCY BYPASS: Hardcode founder email check (HIGHEST PRIORITY)
+  // This ensures oyekunle@alpha.com NEVER gets blocked
+  const sessionToken = request.cookies.get('admin_session');
+  const userEmail = request.cookies.get('admin_user_email');
+  const adminEmail = request.headers.get('x-admin-email');
+  const emailFromCookie = userEmail?.value || '';
+  const emailFromHeader = adminEmail || '';
+
+  // CRITICAL: If founder email is detected anywhere, allow access immediately
+  // This is the HIGHEST PRIORITY check - founder NEVER gets blocked
+  const isFounderEmailDetected = emailFromCookie === 'oyekunle@alpha.com' || 
+                                  emailFromHeader === 'oyekunle@alpha.com';
+  
+  if (isFounderEmailDetected && pathname.startsWith('/admin')) {
+    // Founder bypass - allow all admin routes immediately
+      // Set founder cookies if not already set
+      const response = NextResponse.next();
+      if (!sessionToken) {
+        response.cookies.set('admin_session', `founder_session_${Date.now()}`, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        response.cookies.set('admin_user_id', 'founder-001', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        response.cookies.set('admin_user_email', 'oyekunle@alpha.com', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        response.cookies.set('admin_user_role', 'SUPER_ADMIN', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+      }
+      return response;
+    }
+  }
+
   // Protect admin routes
   if (pathname.startsWith('/admin')) {
     // Check for admin authentication via cookies
-    const sessionToken = request.cookies.get('admin_session');
     const userId = request.cookies.get('admin_user_id');
-    const userEmail = request.cookies.get('admin_user_email');
     const userRole = request.cookies.get('admin_user_role');
 
     // Check headers (for API calls or direct access)
     const authHeader = request.headers.get('authorization');
     const adminId = request.headers.get('x-admin-id');
-    const adminEmail = request.headers.get('x-admin-email');
 
     // Check referer - if coming from login page, allow (for demo)
     const referer = request.headers.get('referer') || '';
@@ -40,9 +88,7 @@ export function middleware(request: NextRequest) {
     const hasSession = sessionToken && userId && userEmail;
     const hasHeaders = adminId || adminEmail || authHeader;
 
-    // Check if user is founder/admin
-    const emailFromCookie = userEmail?.value || '';
-    const emailFromHeader = adminEmail || '';
+    // Check if user is founder/admin (already extracted above, but keep for consistency)
     const idFromCookie = userId?.value || '';
     const idFromHeader = adminId || '';
 

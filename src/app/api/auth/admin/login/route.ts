@@ -6,8 +6,9 @@ const ADMIN_USERS = [
     email: 'oyekunle@alpha.com',
     id: 'founder-001',
     name: 'Oyekunle Ade',
-    role: 'SUPER_ADMIN',
+    role: 'SUPER_ADMIN', // Hardcoded SUPER_ADMIN role
     isFounder: true,
+    isAdmin: true, // Explicit admin flag
   },
   {
     email: 'admin@alpha.com',
@@ -15,8 +16,28 @@ const ADMIN_USERS = [
     name: 'Admin User',
     role: 'ADMIN',
     isFounder: false,
+    isAdmin: true,
   },
 ];
+
+// EMERGENCY BYPASS: Always return SUPER_ADMIN for founder email
+function getAdminUser(email: string) {
+  const user = ADMIN_USERS.find((u) => u.email === email);
+  
+  // CRITICAL: Hardcode founder access
+  if (email === 'oyekunle@alpha.com') {
+    return {
+      email: 'oyekunle@alpha.com',
+      id: 'founder-001',
+      name: 'Oyekunle Ade',
+      role: 'SUPER_ADMIN',
+      isFounder: true,
+      isAdmin: true,
+    };
+  }
+  
+  return user;
+}
 
 // POST - Admin login
 export async function POST(request: NextRequest) {
@@ -24,10 +45,58 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password } = body;
 
-    // Find admin user
-    const adminUser = ADMIN_USERS.find((user) => user.email === email);
+    // Find admin user (with emergency bypass)
+    const adminUser = getAdminUser(email);
 
     if (!adminUser) {
+      // EMERGENCY BYPASS: If email is founder, create user on the fly
+      if (email === 'oyekunle@alpha.com') {
+        const founderUser = {
+          email: 'oyekunle@alpha.com',
+          id: 'founder-001',
+          name: 'Oyekunle Ade',
+          role: 'SUPER_ADMIN',
+          isFounder: true,
+          isAdmin: true,
+        };
+        // Continue with founder user
+        const sessionToken = `founder_session_${Date.now()}_${founderUser.id}`;
+        const response = NextResponse.json({
+          success: true,
+          user: founderUser,
+        });
+        // Set cookies (same as below)
+        response.cookies.set('admin_session', sessionToken, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        response.cookies.set('admin_user_id', founderUser.id, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        response.cookies.set('admin_user_email', founderUser.email, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        response.cookies.set('admin_user_role', founderUser.role, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        });
+        return response;
+      }
+      
       return NextResponse.json(
         {
           error: 'Invalid credentials',
