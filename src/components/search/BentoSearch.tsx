@@ -86,19 +86,26 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
     
     if (activeTab === 'flights') {
       // Validate required fields
-      if (!flightData.origin || !flightData.destination || !flightData.departureDate) {
+      if (!flightData.origin || !flightData.destination) {
         return;
       }
 
       setIsSearching(true);
       setFlightResults([]); // Clear previous results
       
+      // Force valid date for Sandbox (2026-03-15 if empty or past)
+      const SANDBOX_DATE = '2026-03-15';
+      const today = new Date().toISOString().split('T')[0];
+      const departureDate = flightData.departureDate && flightData.departureDate >= today 
+        ? flightData.departureDate 
+        : SANDBOX_DATE;
+      
       try {
         // Call the internal API endpoint
         const params = new URLSearchParams({
           origin: flightData.origin.toUpperCase(),
           destination: flightData.destination.toUpperCase(),
-          departureDate: flightData.departureDate,
+          departureDate: departureDate,
           adults: travelers.adults.toString(),
           children: travelers.children.toString(),
           infants: travelers.infants.toString(),
@@ -301,10 +308,9 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
       // Set default origin to Lagos (LOS) if not set
       const origin = flightData.origin || 'LOS';
       
-      // Set default departure date (14 days from now for Amadeus Sandbox compatibility)
-      const defaultDate = new Date();
-      defaultDate.setDate(defaultDate.getDate() + 14);
-      const formattedDate = defaultDate.toISOString().split('T')[0];
+      // Use fixed Sandbox date for best compatibility
+      const SANDBOX_DATE = '2026-03-15';
+      const formattedDate = SANDBOX_DATE;
       
       // Update state
       setDestinationImage(image);

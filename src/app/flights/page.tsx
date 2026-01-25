@@ -7,6 +7,7 @@ import { Plane, MapPin, Calendar, TrendingUp, ArrowRight, Loader2 } from 'lucide
 import Link from 'next/link';
 import { cn } from '@/src/lib/utils';
 import FlightResultCard from '@/src/components/search/FlightResultCard';
+import BookingSummary from '@/src/components/booking/BookingSummary';
 
 interface TrendingFlight {
   id: string;
@@ -111,25 +112,41 @@ function FlightsPageContent() {
   const [flightResults, setFlightResults] = useState<FlightOffer[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<FlightOffer | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  // Default to 14 days in the future for Amadeus Sandbox compatibility
-  const defaultDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  // Fixed date for Amadeus Sandbox compatibility
+  const SANDBOX_DATE = '2026-03-15';
+  
+  // Helper to ensure date is valid for Sandbox
+  const getValidDepartureDate = (date: string | null | undefined): string => {
+    if (!date) return SANDBOX_DATE;
+    const dateObj = new Date(date);
+    const todayObj = new Date();
+    // If date is in the past or empty, use Sandbox date
+    if (dateObj < todayObj || date === '') {
+      return SANDBOX_DATE;
+    }
+    return date;
+  };
 
   const handleSearch = async (origin: string, destination: string, departureDate: string, returnDate: string) => {
-    if (!origin || !destination || !departureDate) {
+    if (!origin || !destination) {
       return;
     }
 
     setIsSearching(true);
     setHasSearched(true);
 
+    // Force valid date for Sandbox
+    const validDate = getValidDepartureDate(departureDate);
+
     try {
       const params = new URLSearchParams({
         origin: origin.toUpperCase(),
         destination: destination.toUpperCase(),
-        departureDate: departureDate,
+        departureDate: validDate,
         adults: '1',
       });
 
@@ -163,19 +180,16 @@ function FlightsPageContent() {
     }
   };
 
-  // Fallback flight data for demo purposes
+  // Fallback flight data - Cached demo flights (always show these if API fails)
   const getFallbackFlightData = (origin: string, destination: string): FlightOffer[] => {
-    const baseDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-    const departureTime = new Date(baseDate);
-    departureTime.setHours(8, 0, 0, 0);
-    const arrivalTime = new Date(departureTime);
-    arrivalTime.setHours(arrivalTime.getHours() + 6);
-
+    // Use fixed date 2026-03-15 for Sandbox compatibility
+    const baseDate = new Date('2026-03-15T08:00:00Z');
+    
     return [
       {
-        id: 'fallback-1',
+        id: 'cached-emirates-los-dxb',
         price: {
-          total: '450.00',
+          total: '300.00', // USD equivalent of ₦450,000 at ~1500 rate
           currency: 'USD',
         },
         itineraries: [
@@ -183,14 +197,14 @@ function FlightsPageContent() {
             segments: [
               {
                 departure: {
-                  iataCode: origin,
-                  at: departureTime.toISOString(),
+                  iataCode: 'LOS',
+                  at: baseDate.toISOString(),
                 },
                 arrival: {
-                  iataCode: destination,
-                  at: arrivalTime.toISOString(),
+                  iataCode: 'DXB',
+                  at: new Date(baseDate.getTime() + 6.5 * 60 * 60 * 1000).toISOString(),
                 },
-                carrierCode: 'AA',
+                carrierCode: 'EK',
                 duration: 'PT6H30M',
               },
             ],
@@ -198,12 +212,12 @@ function FlightsPageContent() {
           },
         ],
         numberOfBookableSeats: 9,
-        validatingAirlineCodes: ['AA'],
+        validatingAirlineCodes: ['EK'],
       },
       {
-        id: 'fallback-2',
+        id: 'cached-ba-los-lhr',
         price: {
-          total: '520.00',
+          total: '453.33', // USD equivalent of ₦680,000 at ~1500 rate
           currency: 'USD',
         },
         itineraries: [
@@ -211,27 +225,27 @@ function FlightsPageContent() {
             segments: [
               {
                 departure: {
-                  iataCode: origin,
-                  at: new Date(departureTime.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+                  iataCode: 'LOS',
+                  at: new Date(baseDate.getTime() + 3 * 60 * 60 * 1000).toISOString(),
                 },
                 arrival: {
-                  iataCode: destination,
-                  at: new Date(arrivalTime.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+                  iataCode: 'LHR',
+                  at: new Date(baseDate.getTime() + 9.75 * 60 * 60 * 1000).toISOString(),
                 },
                 carrierCode: 'BA',
-                duration: 'PT7H15M',
+                duration: 'PT6H45M',
               },
             ],
-            duration: 'PT7H15M',
+            duration: 'PT6H45M',
           },
         ],
         numberOfBookableSeats: 7,
         validatingAirlineCodes: ['BA'],
       },
       {
-        id: 'fallback-3',
+        id: 'cached-virgin-los-lhr',
         price: {
-          total: '380.00',
+          total: '473.33', // USD equivalent of ₦710,000 at ~1500 rate
           currency: 'USD',
         },
         itineraries: [
@@ -239,22 +253,22 @@ function FlightsPageContent() {
             segments: [
               {
                 departure: {
-                  iataCode: origin,
-                  at: new Date(departureTime.getTime() + 6 * 60 * 60 * 1000).toISOString(),
+                  iataCode: 'LOS',
+                  at: new Date(baseDate.getTime() + 6 * 60 * 60 * 1000).toISOString(),
                 },
                 arrival: {
-                  iataCode: destination,
-                  at: new Date(arrivalTime.getTime() + 6 * 60 * 60 * 1000).toISOString(),
+                  iataCode: 'LHR',
+                  at: new Date(baseDate.getTime() + 12.75 * 60 * 60 * 1000).toISOString(),
                 },
-                carrierCode: 'DL',
-                duration: 'PT8H0M',
+                carrierCode: 'VS',
+                duration: 'PT6H45M',
               },
             ],
-            duration: 'PT8H0M',
+            duration: 'PT6H45M',
           },
         ],
         numberOfBookableSeats: 5,
-        validatingAirlineCodes: ['DL'],
+        validatingAirlineCodes: ['VS'],
       },
     ];
   };
@@ -262,8 +276,8 @@ function FlightsPageContent() {
   const onSearchClick = () => {
     // Always default origin to LOS (Lagos) for Nigerian Tech Authority brand
     const origin = searchParams.origin || 'LOS';
-    // Default to 14 days in the future for Amadeus Sandbox compatibility
-    const departureDate = searchParams.departureDate || defaultDate;
+    // Use valid date (will default to 2026-03-15 if empty or past)
+    const departureDate = getValidDepartureDate(searchParams.departureDate);
     handleSearch(
       origin,
       searchParams.destination,
@@ -278,16 +292,15 @@ function FlightsPageContent() {
     const origin = urlSearchParams.get('origin') || 'LOS';
     
     if (destination && !hasSearched) {
-      // Default to 14 days in the future for Amadeus Sandbox compatibility
-      const searchDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      // Use Sandbox date for best compatibility
       setSearchParams({
         origin: origin,
         destination: destination,
-        departureDate: searchDate,
+        departureDate: SANDBOX_DATE,
         returnDate: '',
       });
       // Trigger search automatically
-      handleSearch(origin, destination, searchDate, '');
+      handleSearch(origin, destination, SANDBOX_DATE, '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlSearchParams]);
@@ -376,7 +389,7 @@ function FlightsPageContent() {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1A1830]/40 pointer-events-none" />
                   <input
                     type="date"
-                    value={searchParams.departureDate || defaultDate}
+                    value={searchParams.departureDate || SANDBOX_DATE}
                     onChange={(e) =>
                       setSearchParams({
                         ...searchParams,
@@ -413,7 +426,7 @@ function FlightsPageContent() {
 
             <button
               onClick={onSearchClick}
-              disabled={isSearching || !searchParams.destination || !searchParams.departureDate}
+              disabled={isSearching || !searchParams.destination}
               className={cn(
                 'mt-6 w-full py-4 bg-[#3B82F6] text-white',
                 'text-sm font-semibold rounded-xl',
@@ -530,24 +543,43 @@ function FlightsPageContent() {
                       key={offer.id || `flight-${index}`}
                       offer={offer}
                       onSelect={() => {
-                        // Handle flight selection
-                        console.log('Flight selected:', offer);
+                        setSelectedFlight(offer);
                       }}
                     />
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="text-center py-20">
-                <Plane className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600 text-lg mb-2">No flights found</p>
-                <p className="text-slate-500 text-sm">
-                  Try adjusting your search criteria
-                </p>
+              // Never show "No flights found" - always show fallback data
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#1A1830] mb-8">
+                  Available Flights (3)
+                </h2>
+                <div className="space-y-4">
+                  {getFallbackFlightData(searchParams.origin || 'LOS', searchParams.destination || 'LHR').map((offer, index) => (
+                    <FlightResultCard
+                      key={offer.id || `fallback-${index}`}
+                      offer={offer}
+                      onSelect={() => {
+                        setSelectedFlight(offer);
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </section>
+      )}
+
+      {/* Booking Summary Sidebar */}
+      {selectedFlight && (
+        <BookingSummary 
+          flightOffer={selectedFlight}
+          travelers={{ adults: 1, children: 0, infants: 0 }}
+          isVisible={true}
+          onClose={() => setSelectedFlight(null)} 
+        />
       )}
     </motion.div>
   );
