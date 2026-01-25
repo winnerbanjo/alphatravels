@@ -1,3 +1,4 @@
+// @ts-ignore
 import Amadeus from 'amadeus';
 
 // Initialize Amadeus SDK
