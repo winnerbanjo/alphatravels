@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Calendar, Users, Search, Building2, Plus, Minus, ChevronDown } from 'lucide-react';
+import { MapPin, Calendar, Users, Search, Building2, Plus, Minus, ChevronDown, Clock, History } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import FlightResultCard from './FlightResultCard';
 import BookingProgress from '../booking/BookingProgress';
@@ -170,19 +170,16 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
     return `${total} Travelers`;
   };
 
-  // Fallback flight data for demo purposes
+  // Fallback flight data - Cached demo flights for home page
   const getFallbackFlightData = (origin: string, destination: string): FlightOffer[] => {
-    const baseDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-    const departureTime = new Date(baseDate);
-    departureTime.setHours(8, 0, 0, 0);
-    const arrivalTime = new Date(departureTime);
-    arrivalTime.setHours(arrivalTime.getHours() + 6);
-
+    // Use fixed date 2026-03-15 for Sandbox compatibility
+    const baseDate = new Date('2026-03-15T08:00:00Z');
+    
     return [
       {
-        id: 'fallback-1',
+        id: 'fallback-emirates-los-dxb',
         price: {
-          total: '450.00',
+          total: '300.00', // USD equivalent of ₦450,000 at ~1500 rate
           currency: 'USD',
         },
         itineraries: [
@@ -191,13 +188,13 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
               {
                 departure: {
                   iataCode: origin || 'LOS',
-                  at: departureTime.toISOString(),
+                  at: baseDate.toISOString(),
                 },
                 arrival: {
-                  iataCode: destination || 'LHR',
-                  at: arrivalTime.toISOString(),
+                  iataCode: destination || 'DXB',
+                  at: new Date(baseDate.getTime() + 6.5 * 60 * 60 * 1000).toISOString(),
                 },
-                carrierCode: 'AA',
+                carrierCode: 'EK',
                 duration: 'PT6H30M',
               },
             ],
@@ -205,12 +202,12 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
           },
         ],
         numberOfBookableSeats: 9,
-        validatingAirlineCodes: ['AA'],
+        validatingAirlineCodes: ['EK'],
       },
       {
-        id: 'fallback-2',
+        id: 'fallback-ba-los-dxb',
         price: {
-          total: '520.00',
+          total: '453.33', // USD equivalent of ₦680,000 at ~1500 rate
           currency: 'USD',
         },
         itineraries: [
@@ -219,26 +216,26 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
               {
                 departure: {
                   iataCode: origin || 'LOS',
-                  at: new Date(departureTime.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+                  at: new Date(baseDate.getTime() + 3 * 60 * 60 * 1000).toISOString(),
                 },
                 arrival: {
-                  iataCode: destination || 'LHR',
-                  at: new Date(arrivalTime.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+                  iataCode: destination || 'DXB',
+                  at: new Date(baseDate.getTime() + 9.75 * 60 * 60 * 1000).toISOString(),
                 },
                 carrierCode: 'BA',
-                duration: 'PT7H15M',
+                duration: 'PT6H45M',
               },
             ],
-            duration: 'PT7H15M',
+            duration: 'PT6H45M',
           },
         ],
         numberOfBookableSeats: 7,
         validatingAirlineCodes: ['BA'],
       },
       {
-        id: 'fallback-3',
+        id: 'fallback-qatar-los-dxb',
         price: {
-          total: '380.00',
+          total: '320.00', // USD equivalent of ₦480,000 at ~1500 rate
           currency: 'USD',
         },
         itineraries: [
@@ -247,21 +244,21 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
               {
                 departure: {
                   iataCode: origin || 'LOS',
-                  at: new Date(departureTime.getTime() + 6 * 60 * 60 * 1000).toISOString(),
+                  at: new Date(baseDate.getTime() + 6 * 60 * 60 * 1000).toISOString(),
                 },
                 arrival: {
-                  iataCode: destination || 'LHR',
-                  at: new Date(arrivalTime.getTime() + 6 * 60 * 60 * 1000).toISOString(),
+                  iataCode: destination || 'DXB',
+                  at: new Date(baseDate.getTime() + 12.5 * 60 * 60 * 1000).toISOString(),
                 },
-                carrierCode: 'DL',
-                duration: 'PT8H0M',
+                carrierCode: 'QR',
+                duration: 'PT6H30M',
               },
             ],
-            duration: 'PT8H0M',
+            duration: 'PT6H30M',
           },
         ],
         numberOfBookableSeats: 5,
-        validatingAirlineCodes: ['DL'],
+        validatingAirlineCodes: ['QR'],
       },
     ];
   };
@@ -762,6 +759,63 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
               Search {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </button>
           </div>
+
+          {/* Recent Searches - Only show for flights tab */}
+          {activeTab === 'flights' && (
+            <div className="mt-6 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-medium text-[#1A1830]/60 uppercase tracking-wider">
+                <History className="h-3.5 w-3.5" />
+                <span>Recent Searches</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlightData({
+                      ...flightData,
+                      origin: 'LOS',
+                      destination: 'DXB',
+                      departureDate: '2026-03-15',
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#1A1830]/70 bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] hover:border-[#3B82F6]/30 hover:text-[#3B82F6] transition-all duration-200"
+                >
+                  <span>LOS → DXB</span>
+                  <span className="text-[#1A1830]/50">(Mar 15)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlightData({
+                      ...flightData,
+                      origin: 'LOS',
+                      destination: 'LHR',
+                      departureDate: '2026-02-22',
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#1A1830]/70 bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] hover:border-[#3B82F6]/30 hover:text-[#3B82F6] transition-all duration-200"
+                >
+                  <span>LOS → LHR</span>
+                  <span className="text-[#1A1830]/50">(Feb 22)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlightData({
+                      ...flightData,
+                      origin: 'LOS',
+                      destination: 'JFK',
+                      departureDate: '2026-04-10',
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#1A1830]/70 bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] hover:border-[#3B82F6]/30 hover:text-[#3B82F6] transition-all duration-200"
+                >
+                  <span>LOS → JFK</span>
+                  <span className="text-[#1A1830]/50">(Apr 10)</span>
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </div>
 
@@ -830,6 +884,48 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
 
                     try {
                       // Step 2: Confirm Price
+                      const priceResponse = await fetch('/api/flights/price', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ flightOffer: offer }),
+                      });
+
+                      const priceData = await priceResponse.json();
+                      if (priceData.success) {
+                        setConfirmedPrice(priceData.data.flightOffers?.[0] || offer);
+                        setIsPriceVerified(true);
+                      } else {
+                        setConfirmedPrice(offer);
+                        setIsPriceVerified(false);
+                      }
+                    } catch (error) {
+                      setConfirmedPrice(offer);
+                      setIsPriceVerified(false);
+                    } finally {
+                      setIsPricing(false);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Default Fallback Flights - Show when no results yet */}
+          {!isSearching && flightResults.length === 0 && bookingStep === 'search' && (
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-[#1A1830] mb-6">
+                Popular Routes from Lagos
+              </h3>
+              {getFallbackFlightData(flightData.origin || 'LOS', flightData.destination || 'DXB').map((offer) => (
+                <FlightResultCard
+                  key={offer.id}
+                  offer={offer}
+                  onSelect={async () => {
+                    setSelectedFlight(offer);
+                    setIsPricing(true);
+                    setBookingStep('select');
+
+                    try {
                       const priceResponse = await fetch('/api/flights/price', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
