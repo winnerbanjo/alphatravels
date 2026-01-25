@@ -2,20 +2,21 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Plane, Bed, Home, Briefcase, Car } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 export default function MobileHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeServiceTab, setActiveServiceTab] = useState('flights');
 
   return (
     <>
-      {/* Emergency Contact Banner */}
-      <div className="bg-[#1D4ED8] text-white text-center py-2 text-xs sm:text-sm font-medium w-full">
-        Emergency Contact
+      {/* Tier 1: Emergency Bar */}
+      <div className="bg-[#000080] text-white text-center py-2 text-xs sm:text-sm font-medium w-full">
+        For emergency, kindly contact 07037744475 an immediate response is assured.
       </div>
 
-      {/* Sticky White Header */}
+      {/* Tier 2: Navigation Bar */}
       <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 md:h-20 items-center justify-between">
@@ -29,38 +30,54 @@ export default function MobileHeader() {
               </span>
             </Link>
 
-            {/* Desktop Navigation - Hidden on mobile */}
-            <div className="hidden md:flex md:items-center md:gap-6">
-              <Link
-                href="/flights"
-                className="px-4 py-2 text-sm font-medium text-[#1A1830] rounded-xl transition-all duration-200 hover:bg-[#F8FAFC]"
-              >
-                Flights
-              </Link>
+            {/* Desktop Navigation - Centered Links */}
+            <div className="hidden lg:flex lg:items-center lg:gap-8">
               <Link
                 href="/hotels"
-                className="px-4 py-2 text-sm font-medium text-[#1A1830] rounded-xl transition-all duration-200 hover:bg-[#F8FAFC]"
+                className="px-4 py-2 text-sm font-medium text-[#1A1830] transition-all duration-200 hover:text-[#000080]"
               >
-                Hotels
+                Hotel
               </Link>
               <Link
-                href="/cars"
-                className="px-4 py-2 text-sm font-medium text-[#1A1830] rounded-xl transition-all duration-200 hover:bg-[#F8FAFC]"
+                href="/visa"
+                className="px-4 py-2 text-sm font-medium text-[#1A1830] transition-all duration-200 hover:text-[#000080]"
               >
-                Car Rental
+                Visa
               </Link>
+              <Link
+                href="/services"
+                className="px-4 py-2 text-sm font-medium text-[#1A1830] transition-all duration-200 hover:text-[#000080]"
+              >
+                Vacation Packages
+              </Link>
+              <Link
+                href="/merchant/onboarding"
+                className="px-4 py-2 text-sm font-medium text-[#1A1830] transition-all duration-200 hover:text-[#000080]"
+              >
+                Become an affiliate
+              </Link>
+            </div>
+
+            {/* Desktop Right Side - Login & Create Account */}
+            <div className="hidden lg:flex lg:items-center lg:gap-4">
               <Link
                 href="/login"
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#1A1830] rounded-xl transition-all duration-200 hover:bg-[#1A1830]/90"
+                className="px-5 py-2.5 text-sm font-semibold text-[#1A1830] transition-all duration-200 hover:text-[#000080]"
               >
-                Sign In
+                Login
+              </Link>
+              <Link
+                href="/merchant/register"
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#FFB800] rounded-lg transition-all duration-200 hover:bg-[#FFB800]/90 shadow-sm"
+              >
+                Create account
               </Link>
             </div>
 
             {/* Mobile menu button */}
             <button
               type="button"
-              className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-[#1A1830] hover:bg-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:ring-offset-2"
+              className="lg:hidden inline-flex items-center justify-center rounded-xl p-2 text-[#1A1830] hover:bg-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#000080] focus:ring-offset-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -73,52 +90,137 @@ export default function MobileHeader() {
           </div>
         </div>
 
-        {/* Mobile Menu Drawer - Full width slide down with animation */}
+        {/* Mobile Menu Drawer */}
         <div
           className={cn(
-            'md:hidden border-t border-[#E2E8F0] bg-white shadow-lg overflow-hidden transition-all duration-300 ease-in-out',
+            'lg:hidden border-t border-[#E2E8F0] bg-white shadow-lg overflow-hidden transition-all duration-300 ease-in-out',
             isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
           )}
         >
           <div className="space-y-1 px-4 pb-6 pt-4">
             <Link
-              href="/flights"
-              className="block rounded-xl px-4 py-3 text-base font-medium text-[#1A1830] hover:bg-[#F8FAFC] transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Flights
-            </Link>
-            <Link
               href="/hotels"
               className="block rounded-xl px-4 py-3 text-base font-medium text-[#1A1830] hover:bg-[#F8FAFC] transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Hotels
+              Hotel
             </Link>
             <Link
-              href="/hotels"
+              href="/visa"
               className="block rounded-xl px-4 py-3 text-base font-medium text-[#1A1830] hover:bg-[#F8FAFC] transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Shortlets
+              Visa
             </Link>
             <Link
-              href="/profile"
+              href="/services"
               className="block rounded-xl px-4 py-3 text-base font-medium text-[#1A1830] hover:bg-[#F8FAFC] transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Manage Bookings
+              Vacation Packages
             </Link>
             <Link
-              href="/cars"
+              href="/merchant/onboarding"
               className="block rounded-xl px-4 py-3 text-base font-medium text-[#1A1830] hover:bg-[#F8FAFC] transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Car Rental
+              Become an affiliate
+            </Link>
+            <Link
+              href="/login"
+              className="block rounded-xl px-4 py-3 text-base font-medium text-[#1A1830] border border-slate-200 hover:bg-slate-50 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Login
+            </Link>
+            <Link
+              href="/merchant/register"
+              className="block rounded-xl px-4 py-3 text-base font-medium text-white bg-[#FFB800] hover:bg-[#FFB800]/90 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Create account
             </Link>
           </div>
         </div>
       </header>
+
+      {/* Tier 3: Service Tabs Bar */}
+      <div className="sticky top-16 md:top-20 z-40 w-full bg-white shadow-md border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+            <button
+              type="button"
+              onClick={() => setActiveServiceTab('flights')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
+                'border-b-2 border-transparent',
+                activeServiceTab === 'flights'
+                  ? 'text-[#000080] border-b-2 border-[#000080]'
+                  : 'text-slate-600 hover:text-[#000080]'
+              )}
+            >
+              <Plane className="h-4 w-4" />
+              <span>Flight</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveServiceTab('hotels')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
+                'border-b-2 border-transparent',
+                activeServiceTab === 'hotels'
+                  ? 'text-[#000080] border-b-2 border-[#000080]'
+                  : 'text-slate-600 hover:text-[#000080]'
+              )}
+            >
+              <Bed className="h-4 w-4" />
+              <span>Hotel</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveServiceTab('shortlets')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
+                'border-b-2 border-transparent',
+                activeServiceTab === 'shortlets'
+                  ? 'text-[#000080] border-b-2 border-[#000080]'
+                  : 'text-slate-600 hover:text-[#000080]'
+              )}
+            >
+              <Home className="h-4 w-4" />
+              <span>Shortlets</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveServiceTab('business')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
+                'border-b-2 border-transparent',
+                activeServiceTab === 'business'
+                  ? 'text-[#000080] border-b-2 border-[#000080]'
+                  : 'text-slate-600 hover:text-[#000080]'
+              )}
+            >
+              <Briefcase className="h-4 w-4" />
+              <span>Business</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveServiceTab('cars')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
+                'border-b-2 border-transparent',
+                activeServiceTab === 'cars'
+                  ? 'text-[#000080] border-b-2 border-[#000080]'
+                  : 'text-slate-600 hover:text-[#000080]'
+              )}
+            >
+              <Car className="h-4 w-4" />
+              <span>Car Rental</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
