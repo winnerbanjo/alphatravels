@@ -40,15 +40,8 @@ export interface BookingSummaryProps {
   onClose?: () => void;
 }
 
-export default function BookingSummary({
-  flightOffer,
-  travelers,
-  destinationImage,
-  destinationName,
-  isVisible,
-  isPriceVerified = false,
-  onClose,
-}: any) {
+export default function BookingSummary(props: any) {
+  const { flightOffer, travelers, destinationImage, destinationName, isVisible, isPriceVerified = false, onClose } = props;
   if (!flightOffer) return null;
 
   // Convert from EUR to NGN at 1750 rate

@@ -177,12 +177,10 @@ export default function MerchantBookFlightPage() {
 
       {/* Booking Summary Sidebar */}
       {selectedFlight && (
-        <BookingSummary
+        <BookingSummary 
           flightOffer={selectedFlight}
           travelers={{ adults: 1, children: 0, infants: 0 }}
-          isVisible={!!selectedFlight}
-          {/* @ts-ignore */}
-          onClose={() => setSelectedFlight(null)}
+          {...({ onClose: () => setSelectedFlight(null) } as any)} 
         />
       )}
     </div>
