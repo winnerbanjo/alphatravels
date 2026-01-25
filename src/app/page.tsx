@@ -36,7 +36,7 @@ export default function Home() {
       className="bg-white min-h-screen"
     >
       {/* Hero Section - Restored Original */}
-      <section className="relative pt-40 px-4 sm:px-8">
+      <section className="relative pt-24 sm:pt-32 md:pt-40 px-4 sm:px-8">
         {/* Hero Background Image - Original travel concept - Extends to cover all content */}
         <div className="absolute inset-0 z-0 rounded-[2.5rem] overflow-hidden">
           <Image
@@ -48,12 +48,12 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-[#1A1830]/75 backdrop-brightness-50" />
         </div>
-        <div className="relative z-10 mx-auto max-w-7xl pt-32 pb-12 md:pb-20">
+        <div className="relative z-10 mx-auto max-w-7xl pt-20 sm:pt-24 md:pt-32 pb-12 md:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center mb-12 md:mb-20 space-y-8"
+            className="text-center mb-8 sm:mb-12 md:mb-20 space-y-6 sm:space-y-8"
           >
             <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tighter leading-none drop-shadow-lg">
               Elite African{' '}

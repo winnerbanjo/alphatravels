@@ -13,41 +13,11 @@ export default function MobileHeader() {
     <>
       {/* Tier 1: Emergency Bar - Mobile Only */}
       <div className="sm:hidden bg-[#000080] text-white text-center py-2 px-2 text-[11px] sm:text-xs font-medium w-full">
-        For emergency, kindly contact 0906 339 9174. Immediate response is assured.
+        For emergency assistance, please call 0906 339 9174. Immediate response assured.
       </div>
       {/* Desktop Emergency Bar */}
       <div className="hidden sm:block bg-[#000080] text-white text-center py-2 text-xs sm:text-sm font-medium w-full">
-        For emergency, kindly contact 07037744475 an immediate response is assured.
-      </div>
-
-      {/* Tier 2: Business Info Bar - Mobile Only */}
-      <div className="sm:hidden bg-white border-b border-slate-200 px-4 py-3 space-y-2">
-        {/* Location */}
-        <div className="flex items-start gap-2">
-          <MapPin className="h-4 w-4 text-slate-600 mt-0.5 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <span className="text-xs font-medium text-slate-600">Address: </span>
-            <span className="text-xs text-slate-900 font-medium leading-tight">
-              7 Chief Tajudeen Odubiyi St, Ilasamaja, Lagos 102214, Lagos
-            </span>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex items-center gap-2">
-          <Compass className="h-4 w-4 text-slate-600 flex-shrink-0" />
-          <span className="text-xs font-medium text-slate-600">Get there: </span>
-          <span className="text-xs text-slate-900 font-medium">1 hr 4 mins</span>
-        </div>
-
-        {/* Contact */}
-        <div className="flex items-center gap-2">
-          <Phone className="h-4 w-4 text-slate-600 flex-shrink-0" />
-          <span className="text-xs font-medium text-slate-600">Phone: </span>
-          <a href="tel:09063399174" className="text-xs text-slate-900 font-medium hover:text-[#000080]">
-            0906 339 9174
-          </a>
-        </div>
+        For emergency assistance, please call 0906 339 9174. Immediate response assured.
       </div>
 
       {/* Tier 3: Brand & Hamburger - Mobile Only */}
