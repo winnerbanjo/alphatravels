@@ -6,50 +6,46 @@ import Link from 'next/link';
 import { MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
+// Sandbox-Safe Routes for Amadeus Demo
 const deals = [
   {
     id: 1,
-    city: 'Lagos',
-    country: 'Nigeria',
-    description: 'Explore the vibrant heart of Nigeria',
-    code: 'LOS',
-    oldPrice: 295000,
-    price: 250000,
-    discount: '15% OFF',
-    image: '/bridge-with-city.jpg',
-  },
-  {
-    id: 2,
-    city: 'London',
-    country: 'United Kingdom',
-    description: 'Historic charm meets modern luxury',
-    code: 'LHR',
-    oldPrice: 850000,
-    price: 680000,
-    discount: '20% OFF',
-    image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1200&auto=format&fit=crop',
-  },
-  {
-    id: 3,
-    city: 'Dubai',
-    country: 'United Arab Emirates',
-    description: 'Where dreams become reality',
-    code: 'DXB',
-    oldPrice: 500000,
-    price: 450000,
-    discount: '10% OFF',
-    image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop',
-  },
-  {
-    id: 4,
     city: 'New York',
     country: 'United States',
     description: 'The city that never sleeps',
     code: 'JFK',
+    origin: 'JFK',
+    destination: 'LHR',
     oldPrice: 1130000,
     price: 850000,
     discount: '25% OFF',
     image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1200&auto=format&fit=crop',
+  },
+  {
+    id: 2,
+    city: 'Madrid',
+    country: 'Spain',
+    description: 'Historic charm meets modern luxury',
+    code: 'MAD',
+    origin: 'MAD',
+    destination: 'CDG',
+    oldPrice: 450000,
+    price: 380000,
+    discount: '15% OFF',
+    image: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=1200&auto=format&fit=crop',
+  },
+  {
+    id: 3,
+    city: 'London',
+    country: 'United Kingdom',
+    description: 'Historic charm meets modern luxury',
+    code: 'LHR',
+    origin: 'LHR',
+    destination: 'JFK',
+    oldPrice: 850000,
+    price: 680000,
+    discount: '20% OFF',
+    image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1200&auto=format&fit=crop',
   },
 ];
 
@@ -159,7 +155,7 @@ export default function TrendingDeals() {
                     <p className="text-xs text-slate-500 mt-1 tracking-tight">per person</p>
                   </div>
                   <Link
-                    href={`/flights?destination=${deal.code}&origin=LOS`}
+                    href={`/flights?destination=${deal.destination}&origin=${deal.origin}`}
                     className={cn(
                       'w-12 h-12 rounded-full bg-[#1A1830]',
                       'flex items-center justify-center',
@@ -238,7 +234,7 @@ export default function TrendingDeals() {
                     <p className="text-xs text-slate-500 mt-1 tracking-tight">per person</p>
                   </div>
                   <Link
-                    href={`/flights?destination=${deal.code}&origin=LOS`}
+                    href={`/flights?destination=${deal.destination}&origin=${deal.origin}`}
                     className={cn(
                       'w-12 h-12 rounded-full bg-[#1A1830]',
                       'flex items-center justify-center',
