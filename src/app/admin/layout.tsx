@@ -1,5 +1,5 @@
 // Temporary Admin Unlock for Alpha Travels Demo
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;

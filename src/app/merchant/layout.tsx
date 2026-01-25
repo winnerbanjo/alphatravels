@@ -1,5 +1,5 @@
 // Temporary Merchant Unlock for Alpha Travels Demo
-export default function MerchantLayout({
+export default async function MerchantLayout({
   children,
 }: {
   children: React.ReactNode;
