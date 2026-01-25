@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Calendar, Users, Search, Building2, Plus, Minus, ChevronDown, Clock, History } from 'lucide-react';
+import { MapPin, Calendar, Users, Search, Building2, Plus, Minus, ChevronDown, Clock, History, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import FlightResultCard from './FlightResultCard';
 import BookingProgress from '../booking/BookingProgress';
@@ -46,6 +46,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
   const [isSearching, setIsSearching] = useState(false);
   const [isPricing, setIsPricing] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [flightResults, setFlightResults] = useState<FlightOffer[]>([]);
   const [selectedFlight, setSelectedFlight] = useState<FlightOffer | null>(null);
   const [confirmedPrice, setConfirmedPrice] = useState<FlightOffer | null>(null);
@@ -89,6 +90,9 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
       if (!flightData.origin || !flightData.destination) {
         return;
       }
+
+      // Mark that search has been performed
+      setHasSearched(true);
 
       // Force valid date for Sandbox (2026-03-15 if empty or past)
       const SANDBOX_DATE = '2026-03-15';
@@ -314,12 +318,14 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
             const fallbackOffers = getFallbackFlightData(origin, airportCode);
             setFlightResults(fallbackOffers);
             setBookingStep('select');
+            setHasSearched(true);
           }
         } catch (error) {
           // Fallback: Show cached demo data on error
           const fallbackOffers = getFallbackFlightData(origin, airportCode);
           setFlightResults(fallbackOffers);
           setBookingStep('select');
+          setHasSearched(true);
         } finally {
           setIsSearching(false);
         }
@@ -328,7 +334,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
   }));
 
   return (
-    <div className="w-full max-w-6xl mx-auto relative">
+    <div className="w-full max-w-6xl mx-auto relative overflow-hidden">
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
         {(['flights', 'hotels', 'cars'] as SearchTab[]).map((tab) => (
@@ -391,7 +397,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     placeholder="LOS"
                     maxLength={3}
-                    required
                     className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
@@ -414,7 +419,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                     }
                     placeholder="DXB"
                     maxLength={3}
-                    required
                     className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all"
                   />
                 </div>
@@ -433,7 +437,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                       setFlightData({ ...flightData, departureDate: e.target.value })
                     }
                     min={today}
-                    required
                     className="w-full h-12 md:h-14 pl-10 pr-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#1A1830] text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
@@ -820,7 +823,7 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
       </div>
 
       {/* Flight Results Section */}
-      {activeTab === 'flights' && (
+      {activeTab === 'flights' && hasSearched && (
         <div className="mt-12">
           {isSearching && (
             <div className="space-y-4">
@@ -859,9 +862,24 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
 
               <BookingProgress currentStep={bookingStep} />
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h3 className="text-2xl font-bold text-[#1A1830]">
-                  Found {flightResults.length} Flight{flightResults.length !== 1 ? 's' : ''}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-[#1A1830]">
+                    Found {flightResults.length} Flight{flightResults.length !== 1 ? 's' : ''}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setHasSearched(false);
+                      setFlightResults([]);
+                      setSelectedFlight(null);
+                      setConfirmedPrice(null);
+                      setBookingStep('search');
+                    }}
+                    className="p-2 text-[#1A1830]/60 hover:text-[#1A1830] hover:bg-[#F8FAFC] rounded-lg transition-colors"
+                    title="Clear Results"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
                 {selectedFlight && (
                   <button
                     onClick={() => {
@@ -911,11 +929,26 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
           )}
 
           {/* Default Fallback Flights - Show when no results yet */}
-          {!isSearching && flightResults.length === 0 && bookingStep === 'search' && (
+          {hasSearched && !isSearching && flightResults.length === 0 && bookingStep === 'search' && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-[#1A1830] mb-6">
-                Popular Routes from Lagos
-              </h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-[#1A1830]">
+                  Popular Routes from Lagos
+                </h3>
+                <button
+                  onClick={() => {
+                    setHasSearched(false);
+                    setFlightResults([]);
+                    setSelectedFlight(null);
+                    setConfirmedPrice(null);
+                    setBookingStep('search');
+                  }}
+                  className="p-2 text-[#1A1830]/60 hover:text-[#1A1830] hover:bg-[#F8FAFC] rounded-lg transition-colors"
+                  title="Clear Results"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
               {getFallbackFlightData(flightData.origin || 'LOS', flightData.destination || 'DXB').map((offer) => (
                 <FlightResultCard
                   key={offer.id}

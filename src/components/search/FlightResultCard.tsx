@@ -1,7 +1,36 @@
 'use client';
 
 import { Plane, Clock, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/src/lib/utils';
+
+// Airline code to name mapping
+const AIRLINE_NAMES: Record<string, string> = {
+  'EK': 'Emirates',
+  'BA': 'British Airways',
+  'QR': 'Qatar Airways',
+  'VS': 'Virgin Atlantic',
+  'AA': 'American Airlines',
+  'DL': 'Delta Air Lines',
+  'UA': 'United Airlines',
+  'LH': 'Lufthansa',
+  'AF': 'Air France',
+  'KL': 'KLM',
+};
+
+const getAirlineName = (carrierCode: string | undefined): string => {
+  if (!carrierCode) return 'Airline';
+  return AIRLINE_NAMES[carrierCode] || carrierCode;
+};
+
+const getAirlineLogoUrl = (carrierCode: string | undefined): string => {
+  if (!carrierCode) return '';
+  const airlineName = AIRLINE_NAMES[carrierCode];
+  if (!airlineName) return '';
+  // Use logo.dev service - format: https://img.logo.dev/airline_code.com
+  const domain = airlineName.toLowerCase().replace(/\s+/g, '');
+  return `https://img.logo.dev/${domain}.com`;
+};
 
 interface FlightSegment {
   departure: {
@@ -94,16 +123,29 @@ export default function FlightResultCard({ offer, onSelect }: FlightResultCardPr
       <div className="bg-gradient-to-r from-[#1A1830] to-[#2A2540] px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Airline Logo Placeholder */}
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <Plane className="h-6 w-6 text-white" />
-            </div>
+            {/* Airline Logo */}
+            {getAirlineLogoUrl(firstSegment?.carrierCode) ? (
+              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden relative">
+                <Image
+                  src={getAirlineLogoUrl(firstSegment?.carrierCode)}
+                  alt={getAirlineName(firstSegment?.carrierCode)}
+                  width={48}
+                  height={48}
+                  className="object-contain p-1"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <Plane className="h-6 w-6 text-white" />
+              </div>
+            )}
             <div>
               <p className="text-white/80 text-xs font-medium">
                 {firstSegment?.carrierCode || 'Airline'}
               </p>
               <p className="text-white text-sm font-semibold">
-                {offer.validatingAirlineCodes?.[0] || 'Flight'}
+                {getAirlineName(firstSegment?.carrierCode)}
               </p>
             </div>
           </div>
