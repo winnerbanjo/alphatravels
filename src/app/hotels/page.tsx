@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, MapPin, Calendar, Users, Star, Wifi, Car, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import HotelBookingForm from '@/src/components/booking/HotelBookingForm';
 
 interface LuxuryHotel {
   id: string;
@@ -88,6 +89,7 @@ export default function HotelsPage() {
     checkOut: '',
     guests: '2',
   });
+  const [selectedHotel, setSelectedHotel] = useState<LuxuryHotel | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -312,11 +314,7 @@ export default function HotelsPage() {
                       </p>
                     </div>
                     <button
-                      onClick={() => {
-                        // Extract numeric price (remove ₦ and commas)
-                        const priceNum = hotel.price.replace(/[₦,]/g, '');
-                        router.push(`/checkout?type=hotel&name=${encodeURIComponent(hotel.name)}&price=${priceNum}&location=${encodeURIComponent(hotel.location)}`);
-                      }}
+                      onClick={() => setSelectedHotel(hotel)}
                       className={cn(
                         'px-6 py-2.5 bg-[#3B82F6] text-white',
                         'text-sm font-semibold rounded-xl',
@@ -335,6 +333,18 @@ export default function HotelsPage() {
         </div>
       </section>
 
+      {/* Hotel Booking Form Modal */}
+      {selectedHotel && (
+        <HotelBookingForm
+          hotel={{
+            id: selectedHotel.id,
+            name: selectedHotel.name,
+            location: selectedHotel.location,
+            price: selectedHotel.price,
+          }}
+          onClose={() => setSelectedHotel(null)}
+        />
+      )}
     </motion.div>
   );
 }

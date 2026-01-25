@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Car, MapPin, Calendar, Clock, User, Shield, Navigation } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import CarBookingForm from '@/src/components/booking/CarBookingForm';
 
 interface CarOption {
   id: string;
@@ -89,6 +90,7 @@ export default function CarsPage() {
     time: '',
   });
   const [chauffeurService, setChauffeurService] = useState(false);
+  const [selectedCar, setSelectedCar] = useState<CarOption | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -344,11 +346,7 @@ export default function CarsPage() {
                       </p>
                     </div>
                     <button
-                      onClick={() => {
-                        // Extract numeric price (remove ₦ and commas)
-                        const priceNum = car.price.replace(/[₦,]/g, '');
-                        router.push(`/checkout?type=car&name=${encodeURIComponent(car.name)}&price=${priceNum}&category=${encodeURIComponent(car.category)}`);
-                      }}
+                      onClick={() => setSelectedCar(car)}
                       className={cn(
                         'px-6 py-2.5 bg-[#3B82F6] text-white',
                         'text-sm font-semibold rounded-xl',
@@ -367,6 +365,18 @@ export default function CarsPage() {
         </div>
       </section>
 
+      {/* Car Booking Form Modal */}
+      {selectedCar && (
+        <CarBookingForm
+          car={{
+            id: selectedCar.id,
+            name: selectedCar.name,
+            category: selectedCar.category,
+            price: selectedCar.price,
+          }}
+          onClose={() => setSelectedCar(null)}
+        />
+      )}
     </motion.div>
   );
 }

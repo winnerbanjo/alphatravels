@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Wallet, TrendingUp, Calendar, LayoutDashboard, Plane, FileText, Store, Copy, Check } from 'lucide-react';
+import { Search, Wallet, TrendingUp, Calendar, LayoutDashboard, Plane, FileText, Store, Copy, Check, Building2, Car, Home } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 // DEMO_DATA - Consolidated mock database
@@ -232,6 +232,86 @@ const AGENT_NAME = 'Oyekunle Ade';
 export default function MerchantDashboardPage() {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
+  const [manualOrders, setManualOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [filterType, setFilterType] = useState<string>('all'); // 'all', 'hotel', 'car', 'shortlet'
+
+  useEffect(() => {
+    // Fetch manual orders
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch('/api/orders/create');
+        if (response.ok) {
+          const data = await response.json();
+          setManualOrders(data.orders || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      const response = await fetch('/api/orders/update-status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setManualOrders((prev) =>
+          prev.map((order) => (order.id === orderId ? data.order : order))
+        );
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      alert('Failed to update order status');
+    }
+  };
+
+  const filteredOrders = filterType === 'all' 
+    ? manualOrders 
+    : manualOrders.filter((order) => order.type === filterType);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const getOrderIcon = (type: string) => {
+    switch (type) {
+      case 'hotel':
+        return Building2;
+      case 'car':
+        return Car;
+      case 'shortlet':
+        return Home;
+      default:
+        return FileText;
+    }
+  };
+
+  const getOrderTitle = (order: any) => {
+    switch (order.type) {
+      case 'hotel':
+        return `${order.orderData.hotelName} - ${order.orderData.location}`;
+      case 'car':
+        return `${order.orderData.carName} (${order.orderData.category})`;
+      case 'shortlet':
+        return `${order.orderData.shortletName} - ${order.orderData.location}`;
+      default:
+        return 'Order';
+    }
+  };
 
   const handleCopyLink = async () => {
     try {
@@ -504,6 +584,183 @@ export default function MerchantDashboardPage() {
                 <p className="text-slate-500">No bookings yet. Start booking for your clients!</p>
               </div>
             )}
+          </motion.div>
+
+          {/* Manual Orders Table (Hotels/Cars/Shortlets) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl mt-8"
+          >
+            <div className="px-8 py-6 border-b border-white/20">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl md:text-3xl font-medium text-[#1A1830] tracking-tight">Manual Orders</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setFilterType('all')}
+                    className={cn(
+                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      filterType === 'all' 
+                        ? 'bg-[#1A1830] text-white' 
+                        : 'bg-white/50 text-slate-700 hover:bg-white/70'
+                    )}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setFilterType('hotel')}
+                    className={cn(
+                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      filterType === 'hotel' 
+                        ? 'bg-[#1A1830] text-white' 
+                        : 'bg-white/50 text-slate-700 hover:bg-white/70'
+                    )}
+                  >
+                    Hotels
+                  </button>
+                  <button
+                    onClick={() => setFilterType('car')}
+                    className={cn(
+                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      filterType === 'car' 
+                        ? 'bg-[#1A1830] text-white' 
+                        : 'bg-white/50 text-slate-700 hover:bg-white/70'
+                    )}
+                  >
+                    Cars
+                  </button>
+                  <button
+                    onClick={() => setFilterType('shortlet')}
+                    className={cn(
+                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      filterType === 'shortlet' 
+                        ? 'bg-[#1A1830] text-white' 
+                        : 'bg-white/50 text-slate-700 hover:bg-white/70'
+                    )}
+                  >
+                    Shortlets
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto px-8 pb-8">
+              {loadingOrders ? (
+                <div className="px-6 py-12 text-center">
+                  <p className="text-slate-500">Loading orders...</p>
+                </div>
+              ) : filteredOrders.length === 0 ? (
+                <div className="px-6 py-12 text-center">
+                  <p className="text-slate-500">No manual orders yet.</p>
+                </div>
+              ) : (
+                <motion.table
+                  initial="hidden"
+                  animate="visible"
+                  variants={containerVariants}
+                  className="w-full"
+                >
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Order ID
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Details
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Total
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOrders.map((order) => {
+                      const Icon = getOrderIcon(order.type);
+                      return (
+                        <motion.tr
+                          key={order.id}
+                          variants={itemVariants}
+                          className="hover:bg-white/40 transition-colors"
+                        >
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <span className="text-sm font-medium text-[#1A1830] font-mono tracking-tight">{order.id}</span>
+                          </td>
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4 text-slate-600" />
+                              <span className="text-sm text-slate-700 tracking-tight capitalize">{order.type}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-6">
+                            <span className="text-sm text-slate-700 tracking-tight">{getOrderTitle(order)}</span>
+                          </td>
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <div>
+                              <span className="text-sm text-slate-700 tracking-tight block">{order.customerInfo.name}</span>
+                              <span className="text-xs text-slate-500 tracking-tight">{order.customerInfo.email}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <select
+                              value={order.status}
+                              onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                              className={cn(
+                                'px-3 py-1.5 text-xs font-medium rounded-full border-0 focus:ring-2 focus:ring-[#1A1830]',
+                                order.status === 'Confirmed' || order.status === 'Paid'
+                                  ? 'bg-green-100 text-green-700'
+                                  : order.status === 'Pending'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-red-100 text-red-700'
+                              )}
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed">Confirmed</option>
+                              <option value="Paid">Paid</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <span className="text-sm font-medium text-slate-700 tracking-tight">{formatCurrency(order.totalPrice)}</span>
+                          </td>
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <span className="text-sm text-slate-600 tracking-tight">
+                              {new Date(order.createdAt).toLocaleDateString()}
+                            </span>
+                          </td>
+                          <td className="px-6 py-6 whitespace-nowrap">
+                            <button
+                              onClick={() => {
+                                const orderData = JSON.stringify(order, null, 2);
+                                navigator.clipboard.writeText(orderData);
+                                alert('Order details copied to clipboard');
+                              }}
+                              className="text-xs text-[#1A1830] hover:underline"
+                            >
+                              View Details
+                            </button>
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                  </tbody>
+                </motion.table>
+              )}
+            </div>
           </motion.div>
         </div>
       </div>
