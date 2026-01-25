@@ -32,10 +32,11 @@ let merchants: any[] = [
 // GET - Fetch single merchant by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const merchantId = params.id;
+    const { id } = await params;
+    const merchantId = id;
 
     const merchant = merchants.find((m) => m.id === merchantId);
 
