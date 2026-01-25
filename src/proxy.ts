@@ -19,8 +19,63 @@ const ADMIN_EMAILS = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // EMERGENCY BYPASS: Hardcode founder email check (HIGHEST PRIORITY)
-  // This ensures oyekunle@alpha.com NEVER gets blocked
+  // EMERGENCY BYPASS FOR FOUNDER - Highest Priority
+  // This prevents 401 errors before auth provider loads
+  try {
+    const adminEmails = ['oyekunle@alpha.com'];
+    
+    // Check cookies first (most reliable)
+    const userEmailCookie = request.cookies.get('admin_user_email');
+    const emailFromCookie = userEmailCookie?.value || '';
+    
+    // Check headers as fallback
+    const adminEmailHeader = request.headers.get('x-admin-email') || '';
+    
+    // If founder email detected anywhere, allow immediately
+    if (adminEmails.includes(emailFromCookie) || adminEmails.includes(adminEmailHeader)) {
+      if (pathname.startsWith('/admin')) {
+        const response = NextResponse.next();
+        // Auto-set cookies if missing
+        if (!request.cookies.get('admin_session')) {
+          response.cookies.set('admin_session', `founder_session_${Date.now()}`, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+          });
+          response.cookies.set('admin_user_id', 'founder-001', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+          });
+          response.cookies.set('admin_user_email', 'oyekunle@alpha.com', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+          });
+          response.cookies.set('admin_user_role', 'SUPER_ADMIN', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+          });
+        }
+        return response;
+      }
+    }
+  } catch (error) {
+    // If any error occurs, continue to normal auth flow
+    // This prevents the proxy from crashing if session is undefined
+    console.error('Proxy bypass check error:', error);
+  }
+
+  // Standard auth check (existing logic)
   const sessionToken = request.cookies.get('admin_session');
   const userEmail = request.cookies.get('admin_user_email');
   const adminEmail = request.headers.get('x-admin-email');

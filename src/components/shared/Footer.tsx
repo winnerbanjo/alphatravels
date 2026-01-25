@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Globe } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -196,22 +195,11 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Global Partner Badge & Copyright */}
+        {/* Copyright */}
         <div className="mt-16 pt-8 border-t border-white/10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Link
-              href="https://nile.tech"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
-            >
-              <Globe className="h-4 w-4 text-white/80" />
-              <span className="text-xs font-medium text-white/80">
-                Global Partner: Nile Technologies
-              </span>
-            </Link>
-            <p className="text-sm text-white/60 text-center md:text-right">
-              © {new Date().getFullYear()} Alpha Travels. All rights reserved.
+          <div className="flex items-center justify-center">
+            <p className="text-sm text-white/60 text-center">
+              © 2026 Alpha Travels. All rights reserved.
             </p>
           </div>
         </div>
