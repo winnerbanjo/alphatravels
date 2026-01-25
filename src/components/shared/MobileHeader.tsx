@@ -184,8 +184,8 @@ export default function MobileHeader() {
         <div className="px-4">
           <div className="grid grid-cols-2 gap-2 py-3">
             {/* Flights - Active */}
-            <button
-              type="button"
+            <Link
+              href="/flights"
               onClick={() => setActiveServiceTab('flights')}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 text-xs font-semibold transition-all',
@@ -197,11 +197,11 @@ export default function MobileHeader() {
             >
               <Plane className="h-4 w-4" />
               <span className="uppercase">FLIGHTS</span>
-            </button>
+            </Link>
 
             {/* Hotels */}
-            <button
-              type="button"
+            <Link
+              href="/hotels"
               onClick={() => setActiveServiceTab('hotels')}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 text-xs font-semibold transition-all',
@@ -213,11 +213,11 @@ export default function MobileHeader() {
             >
               <Bed className="h-4 w-4" />
               <span className="uppercase">HOTELS</span>
-            </button>
+            </Link>
 
             {/* Shortlets */}
-            <button
-              type="button"
+            <Link
+              href="/hotels"
               onClick={() => setActiveServiceTab('shortlets')}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 text-xs font-semibold transition-all',
@@ -229,11 +229,11 @@ export default function MobileHeader() {
             >
               <Home className="h-4 w-4" />
               <span className="uppercase">SHORTLETS</span>
-            </button>
+            </Link>
 
             {/* Manage Bookings */}
-            <button
-              type="button"
+            <Link
+              href="/profile"
               onClick={() => setActiveServiceTab('bookings')}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 text-xs font-semibold transition-all',
@@ -245,11 +245,11 @@ export default function MobileHeader() {
             >
               <Briefcase className="h-4 w-4" />
               <span className="uppercase">MANAGE BOOKINGS</span>
-            </button>
+            </Link>
 
             {/* Car Rental */}
-            <button
-              type="button"
+            <Link
+              href="/cars"
               onClick={() => setActiveServiceTab('cars')}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 text-xs font-semibold transition-all',
@@ -261,7 +261,7 @@ export default function MobileHeader() {
             >
               <Car className="h-4 w-4" />
               <span className="uppercase">CAR RENTAL</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -270,8 +270,8 @@ export default function MobileHeader() {
       <div className="hidden sm:block sticky top-16 md:top-20 z-40 w-full bg-white shadow-md border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-            <button
-              type="button"
+            <Link
+              href="/flights"
               onClick={() => setActiveServiceTab('flights')}
               className={cn(
                 'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
@@ -283,9 +283,9 @@ export default function MobileHeader() {
             >
               <Plane className="h-4 w-4" />
               <span>Flight</span>
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              href="/hotels"
               onClick={() => setActiveServiceTab('hotels')}
               className={cn(
                 'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
@@ -297,9 +297,9 @@ export default function MobileHeader() {
             >
               <Bed className="h-4 w-4" />
               <span>Hotel</span>
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              href="/hotels"
               onClick={() => setActiveServiceTab('shortlets')}
               className={cn(
                 'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
@@ -311,9 +311,9 @@ export default function MobileHeader() {
             >
               <Home className="h-4 w-4" />
               <span>Shortlets</span>
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              href="/services"
               onClick={() => setActiveServiceTab('business')}
               className={cn(
                 'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
@@ -325,9 +325,9 @@ export default function MobileHeader() {
             >
               <Briefcase className="h-4 w-4" />
               <span>Business</span>
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              href="/cars"
               onClick={() => setActiveServiceTab('cars')}
               className={cn(
                 'flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all whitespace-nowrap',
@@ -339,7 +339,7 @@ export default function MobileHeader() {
             >
               <Car className="h-4 w-4" />
               <span>Car Rental</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
