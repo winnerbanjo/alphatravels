@@ -47,6 +47,19 @@ const deals = [
     discount: '20% OFF',
     image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1200&auto=format&fit=crop',
   },
+  {
+    id: 4,
+    city: 'Nairobi',
+    country: 'Kenya',
+    description: 'Gateway to East African adventures',
+    code: 'JNB',
+    origin: 'LOS',
+    destination: 'JNB',
+    oldPrice: 520000,
+    price: 420000,
+    discount: '19% OFF',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?auto=format&fit=crop&w=800&q=80',
+  },
 ];
 
 const containerVariants = {

@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Car, MapPin, Calendar, Clock, User, Shield, Navigation } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import Toast from '@/src/components/shared/Toast';
 
 interface CarOption {
   id: string;
@@ -81,7 +81,7 @@ const carOptions: CarOption[] = [
 ];
 
 export default function CarsPage() {
-  const [showToast, setShowToast] = useState(false);
+  const router = useRouter();
   const [searchParams, setSearchParams] = useState({
     pickup: '',
     dropoff: '',
@@ -292,7 +292,7 @@ export default function CarsPage() {
                   {/* Car Image */}
                   <div className="aspect-[4/5] rounded-xl mb-4 relative overflow-hidden flex-shrink-0">
                     <img
-                      src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop"
+                      src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
                       alt={car.name}
                       className="absolute inset-0 w-full h-full object-cover brightness-90 transition-transform duration-500 group-hover:scale-105"
                     />
@@ -344,7 +344,11 @@ export default function CarsPage() {
                       </p>
                     </div>
                     <button
-                      onClick={() => setShowToast(true)}
+                      onClick={() => {
+                        // Extract numeric price (remove ₦ and commas)
+                        const priceNum = car.price.replace(/[₦,]/g, '');
+                        router.push(`/checkout?type=car&name=${encodeURIComponent(car.name)}&price=${priceNum}&category=${encodeURIComponent(car.category)}`);
+                      }}
                       className={cn(
                         'px-6 py-2.5 bg-[#3B82F6] text-white',
                         'text-sm font-semibold rounded-xl',
@@ -363,11 +367,6 @@ export default function CarsPage() {
         </div>
       </section>
 
-      <Toast
-        message="Demo Mode: Integration in Progress"
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-      />
     </motion.div>
   );
 }

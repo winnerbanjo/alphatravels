@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Building2, MapPin, Calendar, Users, Star, Wifi, Car, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import Toast from '@/src/components/shared/Toast';
 
 interface LuxuryHotel {
   id: string;
@@ -81,7 +81,7 @@ const luxuryHotels: LuxuryHotel[] = [
 ];
 
 export default function HotelsPage() {
-  const [showToast, setShowToast] = useState(false);
+  const router = useRouter();
   const [searchParams, setSearchParams] = useState({
     destination: '',
     checkIn: '',
@@ -260,7 +260,7 @@ export default function HotelsPage() {
                 {/* Image */}
                 <div className="aspect-[4/5] relative overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop"
+                    src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80"
                     alt={hotel.name}
                     className="absolute inset-0 w-full h-full object-cover brightness-90 transition-transform duration-500 group-hover:scale-105"
                   />
@@ -312,7 +312,11 @@ export default function HotelsPage() {
                       </p>
                     </div>
                     <button
-                      onClick={() => setShowToast(true)}
+                      onClick={() => {
+                        // Extract numeric price (remove ₦ and commas)
+                        const priceNum = hotel.price.replace(/[₦,]/g, '');
+                        router.push(`/checkout?type=hotel&name=${encodeURIComponent(hotel.name)}&price=${priceNum}&location=${encodeURIComponent(hotel.location)}`);
+                      }}
                       className={cn(
                         'px-6 py-2.5 bg-[#3B82F6] text-white',
                         'text-sm font-semibold rounded-xl',
@@ -331,11 +335,6 @@ export default function HotelsPage() {
         </div>
       </section>
 
-      <Toast
-        message="Demo Mode: Integration in Progress"
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-      />
     </motion.div>
   );
 }

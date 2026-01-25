@@ -920,16 +920,19 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                   <PassengerForm
                     passengerCount={travelers.adults + travelers.children}
                     onSubmit={async (passengers, contacts) => {
-                      setIsBooking(true);
-
-                      try {
-                        // Step 4: Create Order
-                        const bookingResponse = await fetch('/api/flights/book', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            flightOffer: confirmedPrice,
-                            passengers: passengers.map((p, i) => ({
+                      // Route to checkout page with flight details
+                      const price = confirmedPrice.price.total;
+                      const destination = confirmedPrice.itineraries[0]?.segments[0]?.arrival.iataCode || destinationName || 'Flight';
+                      const origin = confirmedPrice.itineraries[0]?.segments[0]?.departure.iataCode || 'LOS';
+                      
+                      // Store passenger and contact data in sessionStorage for checkout
+                      sessionStorage.setItem('bookingPassengers', JSON.stringify(passengers));
+                      sessionStorage.setItem('bookingContacts', JSON.stringify(contacts));
+                      sessionStorage.setItem('bookingFlightOffer', JSON.stringify(confirmedPrice));
+                      
+                      // Redirect to checkout
+                      router.push(`/checkout?type=flight&name=${encodeURIComponent(`${origin} to ${destination}`)}&price=${price}&currency=${confirmedPrice.price.currency}`);
+                    }}
                               ...p,
                               id: String(i + 1),
                             })),
