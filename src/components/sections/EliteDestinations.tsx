@@ -13,7 +13,8 @@ const IATA_MAP: Record<string, string> = {
   "Dubai": "DXB",
   "Paris": "CDG",
   "Tokyo": "HND",
-  "New York": "JFK"
+  "New York": "JFK",
+  "Nairobi": "NBO"
 };
 
 // Framer Motion Variants - Defined at top level

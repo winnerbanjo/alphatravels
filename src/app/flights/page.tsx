@@ -181,13 +181,28 @@ function FlightsPageContent() {
   };
 
   // Fallback flight data - Cached demo flights (always show these if API fails)
+  // Always shows 3 demo flights: Emirates, British Airways, Virgin Atlantic
   const getFallbackFlightData = (origin: string, destination: string): FlightOffer[] => {
     // Use fixed date 2026-03-15 for Sandbox compatibility
     const baseDate = new Date('2026-03-15T08:00:00Z');
+    const originCode = origin.toUpperCase() || 'LOS';
+    const destCode = destination.toUpperCase() || 'DXB';
+    
+    // Calculate flight duration based on route (rough estimates)
+    const getDuration = (origin: string, destination: string): number => {
+      // Default to 6.5 hours for most routes
+      if (destination === 'DXB') return 6.5;
+      if (destination === 'LHR' || destination === 'LON') return 6.75;
+      if (destination === 'JFK' || destination === 'NYC') return 11;
+      if (destination === 'NBO') return 5;
+      return 6.5;
+    };
+    
+    const durationHours = getDuration(originCode, destCode);
     
     return [
       {
-        id: 'cached-emirates-los-dxb',
+        id: `cached-emirates-${originCode.toLowerCase()}-${destCode.toLowerCase()}`,
         price: {
           total: '300.00', // USD equivalent of ₦450,000 at ~1500 rate
           currency: 'USD',
@@ -197,25 +212,25 @@ function FlightsPageContent() {
             segments: [
               {
                 departure: {
-                  iataCode: 'LOS',
+                  iataCode: originCode,
                   at: baseDate.toISOString(),
                 },
                 arrival: {
-                  iataCode: 'DXB',
-                  at: new Date(baseDate.getTime() + 6.5 * 60 * 60 * 1000).toISOString(),
+                  iataCode: destCode,
+                  at: new Date(baseDate.getTime() + durationHours * 60 * 60 * 1000).toISOString(),
                 },
                 carrierCode: 'EK',
-                duration: 'PT6H30M',
+                duration: `PT${Math.floor(durationHours)}H${Math.floor((durationHours % 1) * 60)}M`,
               },
             ],
-            duration: 'PT6H30M',
+            duration: `PT${Math.floor(durationHours)}H${Math.floor((durationHours % 1) * 60)}M`,
           },
         ],
         numberOfBookableSeats: 9,
         validatingAirlineCodes: ['EK'],
       },
       {
-        id: 'cached-ba-los-lhr',
+        id: `cached-ba-${originCode.toLowerCase()}-${destCode.toLowerCase()}`,
         price: {
           total: '453.33', // USD equivalent of ₦680,000 at ~1500 rate
           currency: 'USD',
@@ -225,25 +240,25 @@ function FlightsPageContent() {
             segments: [
               {
                 departure: {
-                  iataCode: 'LOS',
+                  iataCode: originCode,
                   at: new Date(baseDate.getTime() + 3 * 60 * 60 * 1000).toISOString(),
                 },
                 arrival: {
-                  iataCode: 'LHR',
-                  at: new Date(baseDate.getTime() + 9.75 * 60 * 60 * 1000).toISOString(),
+                  iataCode: destCode,
+                  at: new Date(baseDate.getTime() + (durationHours + 3) * 60 * 60 * 1000).toISOString(),
                 },
                 carrierCode: 'BA',
-                duration: 'PT6H45M',
+                duration: `PT${Math.floor(durationHours)}H${Math.floor((durationHours % 1) * 60)}M`,
               },
             ],
-            duration: 'PT6H45M',
+            duration: `PT${Math.floor(durationHours)}H${Math.floor((durationHours % 1) * 60)}M`,
           },
         ],
         numberOfBookableSeats: 7,
         validatingAirlineCodes: ['BA'],
       },
       {
-        id: 'cached-virgin-los-lhr',
+        id: `cached-virgin-${originCode.toLowerCase()}-${destCode.toLowerCase()}`,
         price: {
           total: '473.33', // USD equivalent of ₦710,000 at ~1500 rate
           currency: 'USD',
@@ -253,18 +268,18 @@ function FlightsPageContent() {
             segments: [
               {
                 departure: {
-                  iataCode: 'LOS',
+                  iataCode: originCode,
                   at: new Date(baseDate.getTime() + 6 * 60 * 60 * 1000).toISOString(),
                 },
                 arrival: {
-                  iataCode: 'LHR',
-                  at: new Date(baseDate.getTime() + 12.75 * 60 * 60 * 1000).toISOString(),
+                  iataCode: destCode,
+                  at: new Date(baseDate.getTime() + (durationHours + 6) * 60 * 60 * 1000).toISOString(),
                 },
                 carrierCode: 'VS',
-                duration: 'PT6H45M',
+                duration: `PT${Math.floor(durationHours)}H${Math.floor((durationHours % 1) * 60)}M`,
               },
             ],
-            duration: 'PT6H45M',
+            duration: `PT${Math.floor(durationHours)}H${Math.floor((durationHours % 1) * 60)}M`,
           },
         ],
         numberOfBookableSeats: 5,

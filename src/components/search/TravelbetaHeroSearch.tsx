@@ -1,20 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { MapPin, Calendar, Users, ArrowUpDown, ChevronRight, Plane } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 export default function TravelbetaHeroSearch() {
+  const router = useRouter();
   const [tripType, setTripType] = useState<'round' | 'oneway' | 'multicity'>('round');
   const [passengers, setPassengers] = useState('1');
   const [cabinClass, setCabinClass] = useState('Economy');
   
+  // Default values pre-populated
   const [searchParams, setSearchParams] = useState({
-    from: '',
-    to: '',
-    departure: '',
-    return: '',
+    from: 'Lagos (LOS)',
+    to: 'Dubai (DXB)',
+    departure: '2026-03-15',
+    return: '2026-03-22',
   });
+
+  // Extract IATA code from input (e.g., "Lagos (LOS)" -> "LOS")
+  const extractIATACode = (input: string): string => {
+    const match = input.match(/\(([A-Z]{3})\)/);
+    return match ? match[1] : input.toUpperCase().slice(0, 3);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setSearchParams((prev) => ({
@@ -33,7 +42,31 @@ export default function TravelbetaHeroSearch() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Search:', { tripType, passengers, cabinClass, ...searchParams });
+    
+    // Extract IATA codes
+    const origin = extractIATACode(searchParams.from);
+    const destination = extractIATACode(searchParams.to);
+    
+    // Validate required fields
+    if (!origin || !destination || !searchParams.departure) {
+      return;
+    }
+
+    // Build search params
+    const params = new URLSearchParams({
+      origin: origin,
+      destination: destination,
+      departureDate: searchParams.departure,
+      adults: passengers,
+    });
+
+    // Add return date for round trip
+    if (tripType === 'round' && searchParams.return) {
+      params.append('returnDate', searchParams.return);
+    }
+
+    // Navigate to flights page with search parameters
+    router.push(`/flights?${params.toString()}`);
   };
 
   const today = new Date().toISOString().split('T')[0];
