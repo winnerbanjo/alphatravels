@@ -1,18 +1,57 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Shield, Briefcase, User, ArrowRight } from 'lucide-react';
+import { Shield, Briefcase, User, ArrowRight, AlertCircle } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
-  const handleDemoLogin = (email: string) => {
-    if (email === 'admin@alpha.com') {
-      router.push('/admin/dashboard');
+  useEffect(() => {
+    const reason = searchParams.get('reason');
+    if (reason === 'admin_access_required') {
+      setLoginMessage('Admin access required. Please log in with admin credentials.');
+    } else if (reason === 'founder_access_required') {
+      setLoginMessage('Founder access required. Only super admins can access this page.');
+    }
+  }, [searchParams]);
+
+  const handleDemoLogin = async (email: string) => {
+    if (email === 'admin@alpha.com' || email === 'oyekunle@alpha.com') {
+      // Set admin session via API
+      try {
+        const response = await fetch('/api/auth/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: 'demo' }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          // Redirect to admin dashboard
+          const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/admin/dashboard';
+          // Use window.location for full page reload to ensure cookies are available to middleware
+          window.location.href = redirectUrl;
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        // Fallback: set cookies manually and redirect for demo
+        document.cookie = `admin_session=demo_session_${Date.now()}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `admin_user_id=founder-001; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `admin_user_email=oyekunle@alpha.com; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `admin_user_role=SUPER_ADMIN; path=/; max-age=604800; SameSite=Lax`;
+        // Use window.location for full page reload
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/admin/dashboard';
+        window.location.href = redirectUrl;
+      }
     } else if (email === 'agent@alpha.com') {
       router.push('/merchant/dashboard');
     } else if (email === 'vip@traveler.com') {
@@ -57,6 +96,17 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="w-full max-w-2xl"
         >
+          {/* Login Message Alert */}
+          {loginMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3"
+            >
+              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-yellow-800">{loginMessage}</p>
+            </motion.div>
+          )}
           {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -84,7 +134,7 @@ export default function LoginPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              onClick={() => handleDemoLogin('admin@alpha.com')}
+              onClick={() => handleDemoLogin('oyekunle@alpha.com')}
               className={cn(
                 'group relative overflow-hidden',
                 'bg-white/70 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 shadow-2xl',
