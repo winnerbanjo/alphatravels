@@ -1,11 +1,15 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { TrendingUp, Users, Clock, Eye, ArrowRight, CheckCircle, XCircle, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { TrendingUp, Users, Clock, Eye, ArrowRight, CheckCircle, XCircle, Zap, Plus } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import Image from 'next/image';
 import AdminSidebar from '@/src/components/admin/AdminSidebar';
+import ManualBookingForm from '@/src/components/admin/ManualBookingForm';
 
 // DEMO_DATA - Consolidated mock database
 const DEMO_DATA = {
@@ -131,6 +135,8 @@ const itemVariants = {
 };
 
 export default function AdminDashboardPage() {
+  const [showManualBooking, setShowManualBooking] = useState(false);
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Fixed God-View Sidebar */}
@@ -151,20 +157,36 @@ export default function AdminDashboardPage() {
                   <p className="text-slate-600 mt-2 tracking-tight">God View - Platform Command Center</p>
                 </div>
               </div>
-              <Link
-                href="/"
-                className={cn(
-                  'inline-flex items-center gap-2',
-                  'px-6 py-3 text-white tracking-tight',
-                  'text-sm font-medium rounded-full',
-                  'bg-gradient-to-r from-[#1A1830] to-[#2A2540]',
-                  'transition-all duration-200',
-                  'hover:opacity-90'
-                )}
-              >
-                <ArrowRight className="w-4 h-4 rotate-180" />
-                Back to Site
-              </Link>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowManualBooking(true)}
+                  className={cn(
+                    'inline-flex items-center gap-2',
+                    'px-6 py-3 text-white tracking-tight',
+                    'text-sm font-medium rounded-full',
+                    'bg-gradient-to-r from-green-600 to-green-700',
+                    'transition-all duration-200',
+                    'hover:opacity-90 shadow-lg'
+                  )}
+                >
+                  <Plus className="w-4 h-4" />
+                  Quick Manual Book
+                </button>
+                <Link
+                  href="/"
+                  className={cn(
+                    'inline-flex items-center gap-2',
+                    'px-6 py-3 text-white tracking-tight',
+                    'text-sm font-medium rounded-full',
+                    'bg-gradient-to-r from-[#1A1830] to-[#2A2540]',
+                    'transition-all duration-200',
+                    'hover:opacity-90'
+                  )}
+                >
+                  <ArrowRight className="w-4 h-4 rotate-180" />
+                  Back to Site
+                </Link>
+              </div>
             </div>
           </div>
         </header>
@@ -448,6 +470,17 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Manual Booking Form Modal */}
+      {showManualBooking && (
+        <ManualBookingForm
+          onClose={() => setShowManualBooking(false)}
+          onSuccess={() => {
+            // Refresh dashboard data if needed
+            setShowManualBooking(false);
+          }}
+        />
+      )}
     </div>
   );
 }

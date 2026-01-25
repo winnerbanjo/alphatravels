@@ -1,11 +1,13 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, TrendingUp, Percent, DollarSign, Settings } from 'lucide-react';
+import { ArrowRight, TrendingUp, Percent, DollarSign, Settings, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import AdminSidebar from '@/src/components/admin/AdminSidebar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // DEMO_DATA - Revenue Control Settings
 const DEMO_DATA = {
@@ -46,6 +48,27 @@ const itemVariants = {
 
 export default function AdminRevenuePage() {
   const [commissionRate, setCommissionRate] = useState(DEMO_DATA.currentCommission);
+  const [revenueData, setRevenueData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRevenueData();
+  }, []);
+
+  const fetchRevenueData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/admin/revenue');
+      const data = await response.json();
+      if (data.success) {
+        setRevenueData(data.revenue);
+      }
+    } catch (error) {
+      console.error('Failed to fetch revenue:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -103,7 +126,9 @@ export default function AdminRevenuePage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-600 tracking-tight">Total Network Revenue</p>
-                  <p className="text-3xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.totalRevenue}</p>
+                  <p className="text-3xl font-medium text-[#1A1830] tracking-tight">
+                    {loading ? <Loader2 className="w-8 h-8 animate-spin" /> : (revenueData?.totalRevenue || DEMO_DATA.totalRevenue)}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -118,7 +143,12 @@ export default function AdminRevenuePage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-600 tracking-tight">Platform Fee Collected</p>
-                  <p className="text-3xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.platformFee}</p>
+                  <p className="text-3xl font-medium text-[#1A1830] tracking-tight">
+                    {loading ? <Loader2 className="w-8 h-8 animate-spin" /> : (revenueData?.platformFee || DEMO_DATA.platformFee)}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Service Fees: {loading ? '...' : (revenueData?.serviceFees || '₦0')} | Commission: {loading ? '...' : (revenueData?.commission || '₦0')}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -133,7 +163,9 @@ export default function AdminRevenuePage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-600 tracking-tight">Merchant Payouts</p>
-                  <p className="text-3xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.merchantPayouts}</p>
+                  <p className="text-3xl font-medium text-[#1A1830] tracking-tight">
+                    {loading ? <Loader2 className="w-8 h-8 animate-spin" /> : (revenueData?.merchantPayouts || DEMO_DATA.merchantPayouts)}
+                  </p>
                 </div>
               </div>
             </motion.div>

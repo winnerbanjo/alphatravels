@@ -235,6 +235,25 @@ export default function MerchantDashboardPage() {
   const [manualOrders, setManualOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [filterType, setFilterType] = useState<string>('all'); // 'all', 'hotel', 'car', 'shortlet'
+  const [merchantStatus, setMerchantStatus] = useState<string>('Verified'); // 'Verified', 'Pending', 'Suspended'
+
+  useEffect(() => {
+    // Fetch merchant status
+    const fetchMerchantStatus = async () => {
+      try {
+        const response = await fetch(`/api/admin/merchants/${AGENT_ID}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setMerchantStatus(data.merchant.status);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch merchant status:', error);
+      }
+    };
+    fetchMerchantStatus();
+  }, []);
 
   useEffect(() => {
     // Fetch manual orders
@@ -412,7 +431,13 @@ export default function MerchantDashboardPage() {
                   )}
                 </button>
                 <Link
-                  href={`/flights?origin_type=merchant&merchant_id=${AGENT_ID}`}
+                  href={merchantStatus === 'Suspended' ? '#' : `/flights?origin_type=merchant&merchant_id=${AGENT_ID}`}
+                  onClick={(e) => {
+                    if (merchantStatus === 'Suspended') {
+                      e.preventDefault();
+                      alert('Your account has been suspended. Please contact support.');
+                    }
+                  }}
                   className={cn(
                     'inline-flex items-center gap-2',
                     'px-8 py-4 text-white tracking-tight',
@@ -420,7 +445,9 @@ export default function MerchantDashboardPage() {
                     'bg-gradient-to-r from-[#1A1830] to-[#2A2540]',
                     'backdrop-blur-md shadow-2xl',
                     'transition-all duration-200',
-                    'hover:opacity-90 hover:shadow-2xl'
+                    merchantStatus === 'Suspended'
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:opacity-90 hover:shadow-2xl'
                   )}
                 >
                   <Plane className="w-4 h-4" />

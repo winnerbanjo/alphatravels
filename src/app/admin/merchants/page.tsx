@@ -1,8 +1,11 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle, XCircle, Users, Mail, Calendar, TrendingUp, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, CheckCircle, XCircle, Users, Mail, Calendar, TrendingUp, Clock, Search, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import Image from 'next/image';
 import AdminSidebar from '@/src/components/admin/AdminSidebar';
@@ -127,6 +130,56 @@ const itemVariants = {
 };
 
 export default function AdminMerchantsPage() {
+  const [merchants, setMerchants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  useEffect(() => {
+    fetchMerchants();
+  }, [searchQuery, statusFilter]);
+
+  const fetchMerchants = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+
+      const response = await fetch(`/api/admin/merchants?${params.toString()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setMerchants(data.merchants || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch merchants:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (merchantId: string, action: string) => {
+    try {
+      const response = await fetch('/api/admin/merchants', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchantId, action }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Refresh merchants list
+        fetchMerchants();
+      } else {
+        alert(data.message || 'Failed to update merchant status');
+      }
+    } catch (error) {
+      console.error('Failed to update merchant:', error);
+      alert('Failed to update merchant status');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Fixed God-View Sidebar */}
@@ -166,6 +219,29 @@ export default function AdminMerchantsPage() {
         </header>
 
         <div className="flex-1 mx-auto max-w-7xl px-8 py-12 w-full">
+          {/* Search and Filter */}
+          <div className="mb-8 flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by email, ID, or company name..."
+                className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#1A1830] focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="Verified">Verified</option>
+              <option value="Pending">Pending</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
           {/* Stats Summary */}
           <motion.div
             initial="hidden"
@@ -184,7 +260,7 @@ export default function AdminMerchantsPage() {
                 <div>
                   <p className="text-sm font-medium text-slate-600 tracking-tight">Verified Agents</p>
                   <p className="text-3xl font-medium text-[#1A1830] tracking-tight">
-                    {DEMO_DATA.merchants.filter((m) => m.status === 'Verified').length}
+                    {loading ? '...' : merchants.filter((m) => m.status === 'Verified').length}
                   </p>
                 </div>
               </div>
@@ -201,7 +277,7 @@ export default function AdminMerchantsPage() {
                 <div>
                   <p className="text-sm font-medium text-slate-600 tracking-tight">Pending Approval</p>
                   <p className="text-3xl font-medium text-[#1A1830] tracking-tight">
-                    {DEMO_DATA.merchants.filter((m) => m.status === 'Pending').length}
+                    {loading ? '...' : merchants.filter((m) => m.status === 'Pending').length}
                   </p>
                 </div>
               </div>
@@ -234,31 +310,41 @@ export default function AdminMerchantsPage() {
               <h2 className="text-2xl md:text-3xl font-medium text-[#1A1830] tracking-tight">All Merchants</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/20">
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Agent
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Total Sales
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Bookings
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {DEMO_DATA.merchants.map((merchant, index) => (
+              {loading ? (
+                <div className="px-8 py-12 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#1A1830] mx-auto mb-4" />
+                  <p className="text-slate-600">Loading merchants...</p>
+                </div>
+              ) : merchants.length === 0 ? (
+                <div className="px-8 py-12 text-center">
+                  <p className="text-slate-600">No merchants found</p>
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/20">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Agent
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Contact
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Total Sales
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Bookings
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {merchants.map((merchant, index) => (
                     <motion.tr
                       key={merchant.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -323,6 +409,7 @@ export default function AdminMerchantsPage() {
                         {merchant.status === 'Pending' ? (
                           <div className="flex gap-2">
                             <button
+                              onClick={() => handleStatusUpdate(merchant.id, 'approve')}
                               className={cn(
                                 'inline-flex items-center gap-2',
                                 'px-4 py-2 bg-green-600 text-white',
@@ -334,6 +421,7 @@ export default function AdminMerchantsPage() {
                               Approve
                             </button>
                             <button
+                              onClick={() => handleStatusUpdate(merchant.id, 'reject')}
                               className={cn(
                                 'inline-flex items-center gap-2',
                                 'px-4 py-2 bg-red-100 text-red-700',
@@ -345,23 +433,38 @@ export default function AdminMerchantsPage() {
                               Reject
                             </button>
                           </div>
-                        ) : (
+                        ) : merchant.status === 'Verified' ? (
                           <button
+                            onClick={() => handleStatusUpdate(merchant.id, 'suspend')}
                             className={cn(
                               'inline-flex items-center gap-2',
-                              'px-4 py-2 bg-[#1A1830] text-white',
+                              'px-4 py-2 bg-yellow-100 text-yellow-700',
                               'rounded-xl text-xs font-medium tracking-tight',
-                              'hover:bg-[#1A1830]/90 transition-all duration-200'
+                              'hover:bg-yellow-200 transition-all duration-200'
                             )}
                           >
-                            Manage
+                            Suspend
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleStatusUpdate(merchant.id, 'verify')}
+                            className={cn(
+                              'inline-flex items-center gap-2',
+                              'px-4 py-2 bg-green-600 text-white',
+                              'rounded-xl text-xs font-medium tracking-tight',
+                              'hover:bg-green-700 transition-all duration-200'
+                            )}
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            Verify
                           </button>
                         )}
                       </td>
                     </motion.tr>
-                  ))}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </motion.div>
         </div>

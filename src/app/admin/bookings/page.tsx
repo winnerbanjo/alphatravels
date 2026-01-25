@@ -1,10 +1,13 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, Plane, Calendar, User, DollarSign, CheckCircle } from 'lucide-react';
+import { ArrowRight, Plane, Calendar, User, DollarSign, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import AdminSidebar from '@/src/components/admin/AdminSidebar';
+import { useState } from 'react';
 
 // DEMO_DATA - Global Bookings (Master PNR List)
 const DEMO_DATA = {
@@ -130,6 +133,32 @@ const itemVariants = {
 };
 
 export default function AdminBookingsPage() {
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  const handleStatusUpdate = async (orderId: string, action: string) => {
+    try {
+      setUpdatingStatus(orderId);
+      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Refresh page or update local state
+        window.location.reload();
+      } else {
+        alert(data.message || 'Failed to update order status');
+      }
+    } catch (error) {
+      console.error('Failed to update order:', error);
+      alert('Failed to update order status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Fixed God-View Sidebar */}
@@ -262,6 +291,9 @@ export default function AdminBookingsPage() {
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Status
                     </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -319,6 +351,42 @@ export default function AdminBookingsPage() {
                           <CheckCircle className="w-3 h-3" />
                           {booking.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-6">
+                        <div className="flex gap-2">
+                          {booking.status !== 'Confirmed' && booking.status !== 'Cancelled' && (
+                            <button
+                              onClick={() => handleStatusUpdate(booking.id, 'confirm')}
+                              disabled={updatingStatus === booking.id}
+                              className={cn(
+                                'inline-flex items-center gap-1',
+                                'px-3 py-1.5 bg-green-600 text-white',
+                                'rounded-lg text-xs font-medium tracking-tight',
+                                'hover:bg-green-700 transition-all duration-200',
+                                'disabled:opacity-50 disabled:cursor-not-allowed'
+                              )}
+                            >
+                              <CheckCircle className="w-3 h-3" />
+                              Confirm
+                            </button>
+                          )}
+                          {booking.status !== 'Cancelled' && (
+                            <button
+                              onClick={() => handleStatusUpdate(booking.id, 'cancel')}
+                              disabled={updatingStatus === booking.id}
+                              className={cn(
+                                'inline-flex items-center gap-1',
+                                'px-3 py-1.5 bg-red-100 text-red-700',
+                                'rounded-lg text-xs font-medium tracking-tight',
+                                'hover:bg-red-200 transition-all duration-200',
+                                'disabled:opacity-50 disabled:cursor-not-allowed'
+                              )}
+                            >
+                              <XCircle className="w-3 h-3" />
+                              Cancel
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
