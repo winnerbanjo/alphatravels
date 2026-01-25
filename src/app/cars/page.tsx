@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Car, MapPin, Calendar, Clock, User, Shield, Navigation } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import Toast from '@/src/components/shared/Toast';
 
 interface CarOption {
   id: string;
@@ -80,6 +81,7 @@ const carOptions: CarOption[] = [
 ];
 
 export default function CarsPage() {
+  const [showToast, setShowToast] = useState(false);
   const [searchParams, setSearchParams] = useState({
     pickup: '',
     dropoff: '',
@@ -342,6 +344,7 @@ export default function CarsPage() {
                       </p>
                     </div>
                     <button
+                      onClick={() => setShowToast(true)}
                       className={cn(
                         'px-6 py-2.5 bg-[#3B82F6] text-white',
                         'text-sm font-semibold rounded-xl',
@@ -359,6 +362,12 @@ export default function CarsPage() {
           </div>
         </div>
       </section>
+
+      <Toast
+        message="Demo Mode: Integration in Progress"
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </motion.div>
   );
 }

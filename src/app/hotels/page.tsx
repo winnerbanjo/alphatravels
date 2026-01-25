@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Building2, MapPin, Calendar, Users, Star, Wifi, Car, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import Toast from '@/src/components/shared/Toast';
 
 interface LuxuryHotel {
   id: string;
@@ -80,6 +81,7 @@ const luxuryHotels: LuxuryHotel[] = [
 ];
 
 export default function HotelsPage() {
+  const [showToast, setShowToast] = useState(false);
   const [searchParams, setSearchParams] = useState({
     destination: '',
     checkIn: '',
@@ -310,6 +312,7 @@ export default function HotelsPage() {
                       </p>
                     </div>
                     <button
+                      onClick={() => setShowToast(true)}
                       className={cn(
                         'px-6 py-2.5 bg-[#3B82F6] text-white',
                         'text-sm font-semibold rounded-xl',
@@ -327,6 +330,12 @@ export default function HotelsPage() {
           </div>
         </div>
       </section>
+
+      <Toast
+        message="Demo Mode: Integration in Progress"
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </motion.div>
   );
 }

@@ -1,10 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { Plane, MapPin, Calendar, TrendingUp, ArrowRight } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Plane, MapPin, Calendar, TrendingUp, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/src/lib/utils';
+import FlightResultCard from '@/src/components/search/FlightResultCard';
 
 interface TrendingFlight {
   id: string;
@@ -73,15 +75,119 @@ const trendingFlights: TrendingFlight[] = [
   },
 ];
 
-export default function FlightsPage() {
+interface FlightOffer {
+  id: string;
+  price: {
+    total: string;
+    currency: string;
+  };
+  itineraries: Array<{
+    segments: Array<{
+      departure: {
+        iataCode: string;
+        at: string;
+      };
+      arrival: {
+        iataCode: string;
+        at: string;
+      };
+      carrierCode: string;
+      duration: string;
+    }>;
+    duration: string;
+  }>;
+  numberOfBookableSeats?: number;
+  validatingAirlineCodes?: string[];
+}
+
+function FlightsPageContent() {
+  const urlSearchParams = useSearchParams();
   const [searchParams, setSearchParams] = useState({
-    origin: 'LOS',
-    destination: '',
+    origin: urlSearchParams.get('origin') || 'LOS',
+    destination: urlSearchParams.get('destination') || '',
     departureDate: '',
     returnDate: '',
   });
+  const [flightResults, setFlightResults] = useState<FlightOffer[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+  const handleSearch = async (origin: string, destination: string, departureDate: string, returnDate: string) => {
+    if (!origin || !destination || !departureDate) {
+      return;
+    }
+
+    setIsSearching(true);
+    setHasSearched(true);
+
+    try {
+      const params = new URLSearchParams({
+        origin: origin.toUpperCase(),
+        destination: destination.toUpperCase(),
+        departureDate: departureDate,
+        adults: '1',
+      });
+
+      if (returnDate) {
+        params.append('returnDate', returnDate);
+      }
+
+      const response = await fetch(`/api/flights/search?${params.toString()}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        // Transform Amadeus response to match our FlightOffer interface
+        const offers = data.data.map((offer: any, index: number) => ({
+          id: offer.id || `offer-${index}`,
+          price: offer.price,
+          itineraries: offer.itineraries,
+          numberOfBookableSeats: offer.numberOfBookableSeats,
+          validatingAirlineCodes: offer.validatingAirlineCodes,
+        }));
+        setFlightResults(offers);
+      } else {
+        setFlightResults([]);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setFlightResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const onSearchClick = () => {
+    // Always default origin to LOS (Lagos) for Nigerian Tech Authority brand
+    const origin = searchParams.origin || 'LOS';
+    handleSearch(
+      origin,
+      searchParams.destination,
+      searchParams.departureDate || tomorrow,
+      searchParams.returnDate
+    );
+  };
+
+  // Auto-populate and search when destination is in URL
+  useEffect(() => {
+    const destination = urlSearchParams.get('destination');
+    const origin = urlSearchParams.get('origin') || 'LOS';
+    
+    if (destination && !hasSearched) {
+      const defaultDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      setSearchParams({
+        origin: origin,
+        destination: destination,
+        departureDate: defaultDate,
+        returnDate: '',
+      });
+      // Trigger search automatically
+      handleSearch(origin, destination, defaultDate, '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSearchParams]);
 
   return (
     <motion.div
@@ -123,11 +229,11 @@ export default function FlightsPage() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1A1830]/40" />
                   <input
                     type="text"
-                    value={searchParams.origin}
+                    value={searchParams.origin || 'LOS'}
                     onChange={(e) =>
                       setSearchParams({
                         ...searchParams,
-                        origin: e.target.value.toUpperCase().slice(0, 3),
+                        origin: e.target.value.toUpperCase().slice(0, 3) || 'LOS',
                       })
                     }
                     placeholder="LOS"
@@ -203,16 +309,27 @@ export default function FlightsPage() {
             </div>
 
             <button
+              onClick={onSearchClick}
+              disabled={isSearching || !searchParams.destination || !searchParams.departureDate}
               className={cn(
                 'mt-6 w-full py-4 bg-[#3B82F6] text-white',
                 'text-sm font-semibold rounded-xl',
                 'shadow-lg transition-all duration-200',
                 'hover:bg-[#2563EB] hover:shadow-xl',
                 'focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:ring-offset-2',
-                'transform hover:scale-[1.02] active:scale-[0.98]'
+                'transform hover:scale-[1.02] active:scale-[0.98]',
+                'disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none',
+                'flex items-center justify-center gap-2'
               )}
             >
-              Search Flights
+              {isSearching ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                'Search Flights'
+              )}
             </button>
           </motion.div>
         </div>
@@ -289,6 +406,58 @@ export default function FlightsPage() {
           </div>
         </div>
       </section>
+
+      {/* Search Results Section */}
+      {hasSearched && (
+        <section className="py-20 px-4 bg-[#F8FAFC]">
+          <div className="mx-auto max-w-7xl">
+            {isSearching ? (
+              <div className="text-center py-20">
+                <Loader2 className="h-12 w-12 animate-spin text-[#3B82F6] mx-auto mb-4" />
+                <p className="text-[#1A1830] font-medium">Searching for flights...</p>
+              </div>
+            ) : flightResults.length > 0 ? (
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#1A1830] mb-8">
+                  Available Flights ({flightResults.length})
+                </h2>
+                <div className="space-y-4">
+                  {flightResults.map((offer, index) => (
+                    <FlightResultCard
+                      key={offer.id || `flight-${index}`}
+                      offer={offer}
+                      onSelect={() => {
+                        // Handle flight selection
+                        console.log('Flight selected:', offer);
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <Plane className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-600 text-lg mb-2">No flights found</p>
+                <p className="text-slate-500 text-sm">
+                  Try adjusting your search criteria
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </motion.div>
+  );
+}
+
+export default function FlightsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#3B82F6]" />
+      </div>
+    }>
+      <FlightsPageContent />
+    </Suspense>
   );
 }

@@ -3,7 +3,18 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/src/lib/utils';
+
+// IATA Code Mapping for Destinations
+const IATA_MAP: Record<string, string> = {
+  "Lagos": "LOS",
+  "London": "LHR",
+  "Dubai": "DXB",
+  "Paris": "CDG",
+  "Tokyo": "HND",
+  "New York": "JFK"
+};
 
 // Framer Motion Variants - Defined at top level
 const containerVariants = {
@@ -62,6 +73,26 @@ interface EliteDestinationsProps {
 }
 
 export default function EliteDestinations({ onDestinationClick }: EliteDestinationsProps) {
+  const router = useRouter();
+
+  const handleDestinationClick = (destination: string, airportCode: string, image: string) => {
+    // If parent component has a handler, use it (for BentoSearch integration)
+    if (onDestinationClick) {
+      onDestinationClick(destination, airportCode, image);
+    } else {
+      // Use IATA_MAP to get the correct IATA code, fallback to airportCode if not found
+      const iataCode = IATA_MAP[destination] || airportCode;
+      
+      // Redirect to flights page with search parameters
+      // Default origin is always LOS (Lagos) for Nigerian Tech Authority brand
+      const params = new URLSearchParams({
+        destination: iataCode,
+        origin: 'LOS', // Default origin from Lagos
+      });
+      router.push(`/flights?${params.toString()}`);
+    }
+  };
+
   return (
     <section className="py-24 px-8 bg-white">
       <div className="mx-auto max-w-7xl">
@@ -93,11 +124,7 @@ export default function EliteDestinations({ onDestinationClick }: EliteDestinati
             <motion.div
               key={destination.id}
               variants={itemVariants}
-              onClick={() => {
-                if (onDestinationClick) {
-                  onDestinationClick(destination.name, destination.airportCode, destination.image);
-                }
-              }}
+              onClick={() => handleDestinationClick(destination.name, destination.airportCode, destination.image)}
               className={cn(
                 'group relative overflow-hidden bg-white/70 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-2xl',
                 'cursor-pointer h-[600px]'
@@ -148,9 +175,7 @@ export default function EliteDestinations({ onDestinationClick }: EliteDestinati
                         whileHover={{ y: 0, scale: 1.05 }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onDestinationClick) {
-                            onDestinationClick(destination.name, destination.airportCode, destination.image);
-                          }
+                          handleDestinationClick(destination.name, destination.airportCode, destination.image);
                         }}
                         className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#1A1830] rounded-xl font-semibold text-sm hover:bg-white/90 tracking-tight shadow-lg transition-all duration-300"
                       >
