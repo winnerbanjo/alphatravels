@@ -4,7 +4,7 @@ import { getAmadeusClient } from '@/src/lib/amadeus';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { flightOffer, passengers, contacts } = body;
+    const { flightOffer, passengers, contacts, merchantId, bookingSource } = body;
 
     // Validate required parameters
     if (!flightOffer || !passengers || !contacts) {
@@ -142,36 +142,62 @@ export async function POST(request: NextRequest) {
         JSON.stringify(bookingData)
       );
 
+      // Store booking metadata (merchant info, source)
+      const bookingMetadata = {
+        bookingSource: bookingSource || 'ADMIN_DIRECT',
+        merchantId: merchantId || null,
+        pnr: response.data.associatedRecords?.[0]?.reference || response.data.id || 'MOCK-PNR-12345',
+        bookingReference: response.data.id || response.data.associatedRecords?.[0]?.reference,
+      };
+
+      // In production, save this to database
+      // await prisma.booking.create({ data: { ...bookingMetadata, ... } });
+
       return NextResponse.json({
         success: true,
         data: response.data,
-        pnr: response.data.associatedRecords?.[0]?.reference || response.data.id || 'MOCK-PNR-12345',
-        bookingReference: response.data.id || response.data.associatedRecords?.[0]?.reference,
+        pnr: bookingMetadata.pnr,
+        bookingReference: bookingMetadata.bookingReference,
         meta: response.result?.meta,
+        bookingMetadata, // Include metadata in response
       });
     } catch (apiError: any) {
       // If API call fails, return a mock booking for development
       console.warn('Amadeus booking API call failed, returning mock booking:', apiError);
       
+      // Store booking metadata (merchant info, source)
+      const mockPnr = `MOCK-PNR-${Date.now()}`;
+      const mockRef = `MOCK-${Date.now()}`;
+      const bookingMetadata = {
+        bookingSource: bookingSource || 'ADMIN_DIRECT',
+        merchantId: merchantId || null,
+        pnr: mockPnr,
+        bookingReference: mockRef,
+      };
+
+      // In production, save this to database
+      // await prisma.booking.create({ data: { ...bookingMetadata, ... } });
+
       return NextResponse.json({
         success: true,
         data: {
           type: 'flight-order',
-          id: `MOCK-${Date.now()}`,
+          id: mockRef,
           associatedRecords: [
             {
-              reference: `MOCK-PNR-${Date.now()}`,
+              reference: mockPnr,
               creationDate: new Date().toISOString(),
               originSystemCode: 'GDS',
             },
           ],
         },
-        pnr: `MOCK-PNR-${Date.now()}`,
-        bookingReference: `MOCK-${Date.now()}`,
+        pnr: mockPnr,
+        bookingReference: mockRef,
         meta: {
           mock: true,
           message: 'Mock booking created for development purposes',
         },
+        bookingMetadata, // Include metadata in response
       });
     }
   } catch (error: any) {

@@ -72,6 +72,10 @@ function CheckoutContent() {
       const flightOfferData = sessionStorage.getItem('bookingFlightOffer');
       
       if (type === 'flight' && passengersData && contactsData && flightOfferData) {
+        // Get merchant metadata from sessionStorage
+        const bookingSource = sessionStorage.getItem('bookingSource') || 'ADMIN_DIRECT';
+        const merchantId = sessionStorage.getItem('merchantId') || null;
+
         // Call the booking API
         const bookingResponse = await fetch('/api/flights/book', {
           method: 'POST',
@@ -83,6 +87,8 @@ function CheckoutContent() {
               id: String(i + 1),
             })),
             contacts: JSON.parse(contactsData),
+            bookingSource,
+            merchantId,
           }),
         });
 
@@ -95,10 +101,20 @@ function CheckoutContent() {
           if (pnrCode) localStorage.setItem('bookingPnr', pnrCode);
           if (bookingRef) localStorage.setItem('bookingReference', bookingRef);
           
+          // Store booking metadata for success page
+          if (bookingData.bookingMetadata) {
+            localStorage.setItem('bookingSource', bookingData.bookingMetadata.bookingSource || 'ADMIN_DIRECT');
+            if (bookingData.bookingMetadata.merchantId) {
+              localStorage.setItem('merchantId', bookingData.bookingMetadata.merchantId);
+            }
+          }
+          
           // Clear sessionStorage
           sessionStorage.removeItem('bookingPassengers');
           sessionStorage.removeItem('bookingContacts');
           sessionStorage.removeItem('bookingFlightOffer');
+          sessionStorage.removeItem('bookingSource');
+          sessionStorage.removeItem('merchantId');
           
           router.push(`/booking/success?pnr=${pnrCode}&ref=${bookingRef}`);
           return;

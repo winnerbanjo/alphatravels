@@ -412,7 +412,7 @@ export default function MerchantDashboardPage() {
                   )}
                 </button>
                 <Link
-                  href="/merchant/book-flight"
+                  href={`/flights?origin_type=merchant&merchant_id=${AGENT_ID}`}
                   className={cn(
                     'inline-flex items-center gap-2',
                     'px-8 py-4 text-white tracking-tight',
@@ -423,8 +423,8 @@ export default function MerchantDashboardPage() {
                     'hover:opacity-90 hover:shadow-2xl'
                   )}
                 >
-                  <Search className="w-4 h-4" />
-                  New Booking
+                  <Plane className="w-4 h-4" />
+                  Book New Flight
                 </Link>
               </div>
             </div>

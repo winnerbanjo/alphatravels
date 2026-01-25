@@ -114,6 +114,21 @@ function FlightsPageContent() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<FlightOffer | null>(null);
 
+  // Capture merchant booking metadata from URL params
+  const originType = urlSearchParams.get('origin_type');
+  const merchantId = urlSearchParams.get('merchant_id');
+  
+  // Store merchant metadata in sessionStorage if present
+  useEffect(() => {
+    if (originType === 'merchant' && merchantId) {
+      sessionStorage.setItem('bookingSource', 'MERCHANT_MANUAL');
+      sessionStorage.setItem('merchantId', merchantId);
+    } else {
+      sessionStorage.setItem('bookingSource', 'ADMIN_DIRECT');
+      sessionStorage.removeItem('merchantId');
+    }
+  }, [originType, merchantId]);
+
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   // Fixed date for Amadeus Sandbox compatibility

@@ -19,6 +19,8 @@ const DEMO_DATA = {
       date: '2026-01-20',
       status: 'Confirmed',
       flightNumber: 'BA 75',
+      bookingSource: 'MERCHANT_MANUAL',
+      merchantId: 'agent-001',
     },
     {
       id: 'DXB7M9',
@@ -30,17 +32,21 @@ const DEMO_DATA = {
       date: '2026-01-19',
       status: 'Confirmed',
       flightNumber: 'EK 783',
+      bookingSource: 'MERCHANT_MANUAL',
+      merchantId: 'agent-002',
     },
     {
       id: 'JFK4P1',
       pnr: 'JFK4P1',
-      merchant: 'Emeka Okoro',
+      merchant: null,
       route: 'LOS → JFK',
       passenger: 'Tunde Adebayo',
       amount: '₦1,040,000',
       date: '2026-01-18',
       status: 'Confirmed',
       flightNumber: 'DL 201',
+      bookingSource: 'ADMIN_DIRECT',
+      merchantId: null,
     },
     {
       id: 'CDG2Q8',
@@ -242,6 +248,9 @@ export default function AdminBookingsPage() {
                       Passenger
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Source
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Merchant
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
@@ -283,7 +292,18 @@ export default function AdminBookingsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-6">
-                        <span className="text-sm text-slate-700 tracking-tight">{booking.merchant}</span>
+                        {booking.bookingSource === 'MERCHANT_MANUAL' ? (
+                          <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full tracking-tight">
+                            Merchant: {booking.merchant || 'Unknown'}
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full tracking-tight">
+                            Alpha Direct
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-6">
+                        <span className="text-sm text-slate-700 tracking-tight">{booking.merchant || 'N/A'}</span>
                       </td>
                       <td className="px-6 py-6">
                         <span className="text-sm font-semibold text-[#1A1830] tracking-tight">{booking.amount}</span>

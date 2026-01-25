@@ -13,6 +13,8 @@ function BookingSuccessContent() {
   const router = useRouter();
   const [pnr, setPnr] = useState<string | null>(null);
   const [bookingRef, setBookingRef] = useState<string | null>(null);
+  const [isMerchantBooking, setIsMerchantBooking] = useState(false);
+  const [merchantId, setMerchantId] = useState<string | null>(null);
 
   useEffect(() => {
     // Get PNR and Booking Reference from URL params or localStorage
@@ -23,6 +25,12 @@ function BookingSuccessContent() {
     
     setPnr(pnrFromUrl || pnrFromStorage);
     setBookingRef(refFromUrl || refFromStorage || pnrFromUrl || pnrFromStorage);
+
+    // Check if this is a merchant booking
+    const bookingSource = localStorage.getItem('bookingSource') || 'ADMIN_DIRECT';
+    const merchantIdFromStorage = localStorage.getItem('merchantId');
+    setIsMerchantBooking(bookingSource === 'MERCHANT_MANUAL');
+    setMerchantId(merchantIdFromStorage);
   }, [searchParams]);
 
   if (!pnr) {
@@ -79,6 +87,11 @@ function BookingSuccessContent() {
           <p className="text-xl text-slate-600 mb-8">
             Your flight has been successfully booked. A confirmation email has been sent to your registered email address.
           </p>
+          {isMerchantBooking && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium mb-4">
+              <span>Processed by Alpha Merchant Network</span>
+            </div>
+          )}
         </motion.div>
 
         {/* Booking Reference Card */}

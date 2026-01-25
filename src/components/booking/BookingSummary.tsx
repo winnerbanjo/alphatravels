@@ -199,6 +199,14 @@ export default function BookingSummary(props: any) {
                 sessionStorage.setItem('bookingTotalPrice', totalPriceNGN.toString());
                 sessionStorage.setItem('bookingDestinationImage', destinationImg);
                 
+                // Preserve merchant metadata if present
+                const bookingSource = sessionStorage.getItem('bookingSource') || 'ADMIN_DIRECT';
+                const merchantId = sessionStorage.getItem('merchantId');
+                sessionStorage.setItem('bookingSource', bookingSource);
+                if (merchantId) {
+                  sessionStorage.setItem('merchantId', merchantId);
+                }
+                
                 // Redirect to passenger details
                 router.push('/merchant/book-flight/passenger-details');
               }}

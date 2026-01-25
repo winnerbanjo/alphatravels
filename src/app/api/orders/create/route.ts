@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract booking source and merchant_id from request
+    const bookingSource = body.bookingSource || 'ADMIN_DIRECT'; // 'ADMIN_DIRECT' or 'MERCHANT_MANUAL'
+    const merchantId = body.merchantId || null;
+
     // Create order record
     const order = {
       id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -33,6 +37,8 @@ export async function POST(request: NextRequest) {
       customerInfo,
       totalPrice: parseFloat(totalPrice),
       status: 'Pending', // 'Pending', 'Confirmed', 'Paid'
+      bookingSource, // 'ADMIN_DIRECT' or 'MERCHANT_MANUAL'
+      merchantId, // Merchant ID if booking came from merchant
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
