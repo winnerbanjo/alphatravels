@@ -933,38 +933,6 @@ const BentoSearch = forwardRef<BentoSearchRef>((props, ref) => {
                       // Redirect to checkout
                       router.push(`/checkout?type=flight&name=${encodeURIComponent(`${origin} to ${destination}`)}&price=${price}&currency=${confirmedPrice.price.currency}`);
                     }}
-                              ...p,
-                              id: String(i + 1),
-                            })),
-                            contacts,
-                          }),
-                        });
-
-                        const bookingData = await bookingResponse.json();
-                        if (bookingData.success) {
-                          // Use bookingReference (data.id) as primary, fallback to pnr
-                          const bookingRef = bookingData.bookingReference || bookingData.pnr;
-                          const pnrCode = bookingData.pnr || bookingRef || bookingData.data?.id;
-                          
-                          // Store in localStorage for persistence
-                          if (pnrCode) {
-                            localStorage.setItem('bookingPnr', pnrCode);
-                          }
-                          if (bookingRef) {
-                            localStorage.setItem('bookingReference', bookingRef);
-                          }
-                          
-                          // Redirect to success page with both references
-                          router.push(`/booking/success?pnr=${pnrCode}&ref=${bookingRef}`);
-                        } else {
-                          alert('Booking failed. Please try again.');
-                          setIsBooking(false);
-                        }
-                      } catch (error) {
-                        alert('An error occurred. Please try again.');
-                        setIsBooking(false);
-                      }
-                    }}
                     onCancel={() => {
                       setBookingStep('select');
                       setSelectedFlight(null);
