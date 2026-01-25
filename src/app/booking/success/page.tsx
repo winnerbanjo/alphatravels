@@ -186,14 +186,7 @@ function BookingSuccessContent() {
 
 export default function BookingSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-[#F8FAFC] to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#1A1830] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading booking details...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div>Loading...</div>}>
       <BookingSuccessContent />
     </Suspense>
   );

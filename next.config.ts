@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
-const nextConfig: NextConfig = {
-  images: { remotePatterns: [{ protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' }] },
+const nextConfig = {
+  images: { unoptimized: true },
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-};
+} as any;
 export default nextConfig;
