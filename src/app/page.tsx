@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import BentoSearch from '@/src/components/search/BentoSearch';
+import TravelbetaHeroSearch from '@/src/components/search/TravelbetaHeroSearch';
 import TrendingDeals from '@/src/components/sections/TrendingDeals';
 import EliteDestinations from '@/src/components/sections/EliteDestinations';
 import WhyAlphaTravels from '@/src/components/sections/WhyAlphaTravels';
@@ -34,59 +35,48 @@ export default function Home() {
       transition={{ duration: 0.5 }}
       className="bg-white min-h-screen"
     >
-      {/* Hero Section */}
-      <section className="relative pt-40 pb-40 px-8 overflow-hidden">
-        {/* Hero Background Image */}
+      {/* Hero Section - Travelbeta Style */}
+      <section className="relative min-h-[600px] md:min-h-[700px] overflow-hidden">
+        {/* Hero Background Image - Plane mid-flight */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/travel-concept-with-landmarks.jpg"
-            alt="Elite travel concept with landmarks"
+            src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2074&auto=format&fit=crop"
+            alt="Plane mid-flight"
             fill
             priority
-            className="object-cover rounded-[2.5rem]"
+            className="object-cover"
           />
-          <div className="absolute inset-0 bg-[#1A1830]/75 backdrop-brightness-50 rounded-[2.5rem]" />
+          {/* Dark overlay for text contrast */}
+          <div className="absolute inset-0 bg-[#1A1830]/60" />
         </div>
-        <div className="relative z-10 mx-auto max-w-7xl pt-32">
+
+        {/* Hero Content */}
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-32 md:pt-40 pb-80 md:pb-96">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center mb-20 space-y-8"
+            className="text-center mb-12"
           >
-            <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tighter leading-none drop-shadow-lg">
-              Elite African{' '}
-              <span className="inline-block min-w-[200px] md:min-w-[400px] text-left">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={currentService}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="inline-block"
-                  >
-                    {services[currentService]}.
-                  </motion.span>
-                </AnimatePresence>
-              </span>
+            <h1 className="text-4xl md:text-7xl font-bold text-white tracking-tight leading-tight drop-shadow-lg">
+              Going somewhere?
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto font-medium tracking-tight drop-shadow-md">
-              The premier portal for the global Nigerian.
-            </p>
           </motion.div>
 
-          {/* Bento Search - Elevated with Results */}
+          {/* Search Container - Overlaps bottom of hero */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-16"
+            className="relative -mb-32 md:-mb-40"
           >
-            <BentoSearch ref={bentoSearchRef} />
+            <TravelbetaHeroSearch />
           </motion.div>
         </div>
       </section>
+
+      {/* Spacer to account for overlapping search container */}
+      <div className="h-32 md:h-40" />
 
       {/* Trending Deals Section */}
       <motion.div

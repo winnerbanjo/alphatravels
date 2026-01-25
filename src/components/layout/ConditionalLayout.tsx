@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Navbar from '@/src/components/shared/Navbar';
+import MobileHeader from '@/src/components/shared/MobileHeader';
 import Footer from '@/src/components/shared/Footer';
 
 export default function ConditionalLayout({
@@ -18,13 +18,11 @@ export default function ConditionalLayout({
     return <>{children}</>;
   }
 
-  // Regular pages with Navbar and Footer
+  // Regular pages with MobileHeader and Footer
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <div className="relative">
-        <Navbar />
-      </div>
-      <main className="flex-1 pt-32">{children}</main>
+      <MobileHeader />
+      <main className="flex-1">{children}</main>
       <Footer />
     </div>
   );
