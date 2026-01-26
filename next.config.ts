@@ -1,15 +1,14 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-  output: 'standalone', // Helps stabilize Vercel deployments
-  images: {
-    unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
+  experimental: {
+    turbo: {
+      // This helps stabilize the new Turbopack compiler
+      rules: {
+        "*.svg": ["@svgr/webpack"],
       },
-    ],
+    },
   },
 };
 

@@ -1,5 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-export default function Layout({ children }: any) {
+export default function APILayout({ children }: any) {
   return <>{children}</>;
 }
