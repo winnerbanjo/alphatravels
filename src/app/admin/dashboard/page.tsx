@@ -309,7 +309,8 @@ export default function AdminDashboardPage() {
                             </span>
                           </td>
                           <td className="px-6 py-6">
-                            <button
+                            <Link
+                              href={`/admin/merchants/${merchant.id}`}
                               className={cn(
                                 'inline-flex items-center gap-2',
                                 'px-4 py-2 bg-[#1A1830] text-white',
@@ -319,7 +320,7 @@ export default function AdminDashboardPage() {
                             >
                               <Eye className="w-3 h-3" />
                               Manage
-                            </button>
+                            </Link>
                           </td>
                         </motion.tr>
                       ))}

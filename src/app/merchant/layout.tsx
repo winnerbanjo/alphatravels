@@ -1,3 +1,3 @@
-export default function MerchantLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return <section className="min-h-screen bg-gray-50">{children}</section>;
 }
