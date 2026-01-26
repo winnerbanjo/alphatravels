@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
-export default function Layout({ children }: any) {
+export default function GodModeLayout({ children }: { children: any }) {
   return <>{children}</>;
 }

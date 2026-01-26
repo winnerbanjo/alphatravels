@@ -2,14 +2,8 @@
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-  experimental: {
-    turbo: {
-      // This helps stabilize the new Turbopack compiler
-      rules: {
-        "*.svg": ["@svgr/webpack"],
-      },
-    },
-  },
+  // This prevents Vercel from trying to run the code during build
+  staticPageGenerationTimeout: 1000,
 };
 
 export default nextConfig;
