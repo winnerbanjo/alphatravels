@@ -1,11 +1,3 @@
-// Temporary Admin Unlock for Alpha Travels Demo
-// ALL AUTH GUARDS REMOVED - Force unlock for demo
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  // Hard-code admin access - NO CHECKS, NO BLOCKS
-  const isAdmin = true; // Force true to bypass any "Unauthorized" errors
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
