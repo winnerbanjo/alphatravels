@@ -13,6 +13,7 @@ export interface IAuditLog extends Document {
   error?: string;
   durationMs?: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const AuditLogSchema = new Schema<IAuditLog>(

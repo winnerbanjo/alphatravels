@@ -28,6 +28,9 @@ export async function connectDb(): Promise<typeof mongoose> {
   });
   try {
     cached.conn = await cached.promise;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('MongoDB Connected');
+    }
     return cached.conn;
   } catch (e) {
     cached.promise = null;

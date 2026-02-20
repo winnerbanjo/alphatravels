@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDb } from '@/src/lib/db';
 import { User } from '@/src/models/User';
-import { success, error } from '@/src/lib/api-response';
+import { success, error, handleApiError } from '@/src/lib/api-response';
 
 function setSessionCookies(response: NextResponse, user: { id: string; email: string; role: string }) {
   const sessionToken = `admin_session_${Date.now()}_${user.id}`;
@@ -50,8 +50,7 @@ export async function POST(request: NextRequest) {
     setSessionCookies(response, { id: userPayload.id, email: userPayload.email, role: userPayload.role });
     return response;
   } catch (err) {
-    console.error('Admin login error:', err);
-    return error(err instanceof Error ? err.message : 'Login failed', 500);
+    return handleApiError(err);
   }
 }
 
@@ -78,6 +77,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err) {
-    return error(err instanceof Error ? err.message : 'Session check failed', 500);
+    return handleApiError(err);
   }
 }

@@ -5,6 +5,8 @@ export type MerchantStatus = 'Verified' | 'Pending' | 'Suspended';
 export interface IMerchant extends Document {
   name: string;
   email: string;
+  /** Reference to Users collection (merchant account owner). */
+  userId?: mongoose.Types.ObjectId;
   companyName?: string;
   status: MerchantStatus;
   joinDate?: string;
@@ -22,6 +24,7 @@ const MerchantSchema = new Schema<IMerchant>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     companyName: String,
     status: {
       type: String,
@@ -40,6 +43,7 @@ const MerchantSchema = new Schema<IMerchant>(
 );
 
 MerchantSchema.index({ status: 1 });
+MerchantSchema.index({ userId: 1 });
 
 export const Merchant: Model<IMerchant> =
   mongoose.models?.Merchant ?? mongoose.model<IMerchant>('Merchant', MerchantSchema);

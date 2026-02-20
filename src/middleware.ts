@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Production gatekeeping: /admin and /merchant require valid session cookies.
- * Admin identity is validated against Users collection (see auth admin login).
+ * Production gatekeeping: unauthenticated users are redirected away from
+ * /admin and /merchant. Session cookies are set only after MongoDB Users
+ * collection verification (see /api/auth/admin/login and /api/auth/merchant/*).
  */
 const ADMIN_PREFIX = '/admin';
 const MERCHANT_PREFIX = '/merchant';
