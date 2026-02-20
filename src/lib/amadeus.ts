@@ -1,8 +1,7 @@
-// @ts-nocheck
 import Amadeus from 'amadeus';
+import type { AmadeusClient } from 'amadeus';
 
-// Use 'any' to bypass the namespace type error
-let amadeus: any = null;
+let amadeus: AmadeusClient | null = null;
 
 if (typeof window === 'undefined') {
   const clientId = process.env.AMADEUS_API_KEY;
@@ -15,19 +14,17 @@ if (typeof window === 'undefined') {
         clientId,
         clientSecret
       });
-    } catch (error) {
-      // If initialization fails, export empty object
-      amadeus = {};
+    } catch {
+      amadeus = null;
     }
   } else {
-    // Export empty object if env vars are missing
-    amadeus = {};
+    amadeus = null;
   }
 }
 
 export { amadeus };
 
 // Backward compatibility: Export function for existing code
-export function getAmadeusClient(): any {
-  return amadeus || {};
+export function getAmadeusClient(): AmadeusClient | null {
+  return amadeus;
 }

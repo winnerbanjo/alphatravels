@@ -94,18 +94,17 @@ function CheckoutContent() {
 
         const bookingData = await bookingResponse.json();
         if (bookingData.success) {
-          const bookingRef = bookingData.bookingReference || bookingData.pnr;
-          const pnrCode = bookingData.pnr || bookingRef || bookingData.data?.id;
+          const payload = bookingData.data ?? bookingData;
+          const bookingRef = payload.bookingReference || payload.pnr;
+          const pnrCode = payload.pnr || bookingRef || payload.data?.id;
           
-          // Store in localStorage
           if (pnrCode) localStorage.setItem('bookingPnr', pnrCode);
           if (bookingRef) localStorage.setItem('bookingReference', bookingRef);
           
-          // Store booking metadata for success page
-          if (bookingData.bookingMetadata) {
-            localStorage.setItem('bookingSource', bookingData.bookingMetadata.bookingSource || 'ADMIN_DIRECT');
-            if (bookingData.bookingMetadata.merchantId) {
-              localStorage.setItem('merchantId', bookingData.bookingMetadata.merchantId);
+          if (payload.bookingMetadata) {
+            localStorage.setItem('bookingSource', payload.bookingMetadata.bookingSource || 'ADMIN_DIRECT');
+            if (payload.bookingMetadata.merchantId) {
+              localStorage.setItem('merchantId', payload.bookingMetadata.merchantId);
             }
           }
           

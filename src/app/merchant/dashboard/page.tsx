@@ -7,169 +7,14 @@ import { usePathname } from 'next/navigation';
 import { Search, Wallet, TrendingUp, Calendar, LayoutDashboard, Plane, FileText, Store, Copy, Check, Building2, Car, Home } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
-// DEMO_DATA - Consolidated mock database
-const DEMO_DATA = {
-  stats: {
-    totalBookings: 142,
-    totalRevenue: '₦18,450,000',
-    commissionEarned: '₦922,500',
-    walletBalance: '₦120,000',
-  },
-  recentBookings: [
-  {
-    id: 'PNR-123456',
-    flight: 'LOS → LHR',
-    customer: 'Adebayo Okafor',
-    status: 'Confirmed',
-    commission: '₦45,000',
-    date: '2026-01-24',
-    revenue: '₦900,000',
-  },
-  {
-    id: 'PNR-234567',
-    flight: 'DXB → LOS',
-    customer: 'Chioma Nwosu',
-    status: 'Confirmed',
-    commission: '₦38,500',
-    date: '2026-01-24',
-    revenue: '₦770,000',
-  },
-  {
-    id: 'PNR-345678',
-    flight: 'LOS → JFK',
-    customer: 'Emeka Okoro',
-    status: 'Confirmed',
-    commission: '₦52,000',
-    date: '2026-01-23',
-    revenue: '₦1,040,000',
-  },
-  {
-    id: 'PNR-456789',
-    flight: 'CDG → LOS',
-    customer: 'Folake Adeyemi',
-    status: 'Confirmed',
-    commission: '₦41,200',
-    date: '2026-01-23',
-    revenue: '₦824,000',
-  },
-  {
-    id: 'PNR-567890',
-    flight: 'LOS → YYZ',
-    customer: 'Tunde Adebayo',
-    status: 'Confirmed',
-    commission: '₦48,750',
-    date: '2026-01-22',
-    revenue: '₦975,000',
-  },
-  {
-    id: 'PNR-678901',
-    flight: 'LHR → LOS',
-    customer: 'Amina Bello',
-    status: 'Confirmed',
-    commission: '₦43,000',
-    date: '2026-01-22',
-    revenue: '₦860,000',
-  },
-  {
-    id: 'PNR-789012',
-    flight: 'LOS → DXB',
-    customer: 'Chukwuemeka Nwosu',
-    status: 'Confirmed',
-    commission: '₦35,000',
-    date: '2026-01-21',
-    revenue: '₦700,000',
-  },
-  {
-    id: 'PNR-890123',
-    flight: 'JFK → LOS',
-    customer: 'Fatima Ibrahim',
-    status: 'Confirmed',
-    commission: '₦55,000',
-    date: '2026-01-21',
-    revenue: '₦1,100,000',
-  },
-  {
-    id: 'PNR-901234',
-    flight: 'LOS → LHR',
-    customer: 'Oluwaseun Adeyemi',
-    status: 'Confirmed',
-    commission: '₦46,500',
-    date: '2026-01-20',
-    revenue: '₦930,000',
-  },
-  {
-    id: 'PNR-012345',
-    flight: 'YYZ → LOS',
-    customer: 'Kemi Okafor',
-    status: 'Pending Payment',
-    commission: '₦50,000',
-    date: '2026-01-20',
-    revenue: '₦1,000,000',
-  },
-  {
-    id: 'PNR-135792',
-    flight: 'LOS → JFK',
-    customer: 'David Okonkwo',
-    status: 'Confirmed',
-    commission: '₦51,250',
-    date: '2026-01-19',
-    revenue: '₦1,025,000',
-  },
-  {
-    id: 'PNR-246813',
-    flight: 'DXB → LOS',
-    customer: 'Blessing Eze',
-    status: 'Confirmed',
-    commission: '₦39,000',
-    date: '2026-01-19',
-    revenue: '₦780,000',
-  },
-  {
-    id: 'PNR-369147',
-    flight: 'LOS → LHR',
-    customer: 'James Adeleke',
-    status: 'Cancelled',
-    commission: '₦0',
-    date: '2026-01-18',
-    revenue: '₦0',
-  },
-  {
-    id: 'PNR-481516',
-    flight: 'LHR → LOS',
-    customer: 'Maryam Usman',
-    status: 'Confirmed',
-    commission: '₦44,000',
-    date: '2026-01-18',
-    revenue: '₦880,000',
-  },
-  {
-    id: 'PNR-592637',
-    flight: 'LOS → YYZ',
-    customer: 'Peter Okafor',
-    status: 'Pending Payment',
-    commission: '₦47,500',
-    date: '2026-01-17',
-    revenue: '₦950,000',
-  },
-  {
-    id: 'PNR-604851',
-    flight: 'JFK → LOS',
-    customer: 'Grace Chukwu',
-    status: 'Confirmed',
-    commission: '₦53,500',
-    date: '2026-01-17',
-    revenue: '₦1,070,000',
-  },
-  {
-    id: 'PNR-715962',
-    flight: 'LOS → DXB',
-    customer: 'Michael Adebayo',
-    status: 'Confirmed',
-    commission: '₦36,250',
-    date: '2026-01-16',
-    revenue: '₦725,000',
-  },
-],
+type MerchantDashboardData = {
+  stats: { totalBookings: number; totalRevenue: string; commissionEarned: string; walletBalance: string };
+  recentBookings: Array<{ id: string; flight: string; customer: string; status: string; commission: string; date: string; revenue: string }>;
+};
+
+const EMPTY_MERCHANT_DASHBOARD: MerchantDashboardData = {
+  stats: { totalBookings: 0, totalRevenue: '₦0', commissionEarned: '₦0', walletBalance: '₦0' },
+  recentBookings: [],
 };
 
 // Framer Motion Variants
@@ -235,17 +80,26 @@ export default function MerchantDashboardPage() {
   const [manualOrders, setManualOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [filterType, setFilterType] = useState<string>('all'); // 'all', 'hotel', 'car', 'shortlet'
-  const [merchantStatus, setMerchantStatus] = useState<string>('Verified'); // 'Verified', 'Pending', 'Suspended'
+  const [merchantStatus, setMerchantStatus] = useState<string>('Verified');
+  const [dashboardData, setDashboardData] = useState<MerchantDashboardData>(EMPTY_MERCHANT_DASHBOARD);
 
   useEffect(() => {
-    // Fetch merchant status
+    fetch('/api/merchant/dashboard')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) setDashboardData(json.data);
+      })
+      .catch(() => setDashboardData(EMPTY_MERCHANT_DASHBOARD));
+  }, []);
+
+  useEffect(() => {
     const fetchMerchantStatus = async () => {
       try {
         const response = await fetch(`/api/admin/merchants/${AGENT_ID}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.success) {
-            setMerchantStatus(data.merchant.status);
+          if (data.success && data.data?.merchant) {
+            setMerchantStatus(data.data.merchant.status);
           }
         }
       } catch (error) {
@@ -262,7 +116,7 @@ export default function MerchantDashboardPage() {
         const response = await fetch('/api/orders/create');
         if (response.ok) {
           const data = await response.json();
-          setManualOrders(data.orders || []);
+          setManualOrders((data.data?.orders ?? data.orders) || []);
         }
       } catch (error) {
         console.error('Failed to fetch orders:', error);
@@ -283,9 +137,8 @@ export default function MerchantDashboardPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setManualOrders((prev) =>
-          prev.map((order) => (order.id === orderId ? data.order : order))
-        );
+        const updated = data.data?.order ?? data.order;
+        if (updated) setManualOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)));
       }
     } catch (error) {
       console.error('Failed to update status:', error);
@@ -478,7 +331,7 @@ export default function MerchantDashboardPage() {
                 </div>
               </div>
             <p className="text-sm font-medium text-slate-600 mb-2 tracking-tight">Wallet Balance</p>
-            <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.stats.walletBalance}</p>
+            <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{dashboardData.stats.walletBalance}</p>
               <Link
                 href="/merchant/wallet"
                 className="text-xs text-[#1A1830] hover:underline mt-2 inline-block tracking-tight"
@@ -499,7 +352,7 @@ export default function MerchantDashboardPage() {
                 </div>
               </div>
             <p className="text-sm font-medium text-slate-600 mb-2 tracking-tight">Total Bookings</p>
-            <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.stats.totalBookings}</p>
+            <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{dashboardData.stats.totalBookings}</p>
               <p className="text-xs text-slate-500 mt-2 tracking-tight">All time</p>
             </motion.div>
 
@@ -515,8 +368,8 @@ export default function MerchantDashboardPage() {
                 </div>
               </div>
             <p className="text-sm font-medium text-slate-600 mb-2 tracking-tight">Commission Earned</p>
-            <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.stats.commissionEarned}</p>
-            <p className="text-xs text-slate-500 mt-2 tracking-tight">Total Revenue: {DEMO_DATA.stats.totalRevenue}</p>
+            <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{dashboardData.stats.commissionEarned}</p>
+            <p className="text-xs text-slate-500 mt-2 tracking-tight">Total Revenue: {dashboardData.stats.totalRevenue}</p>
             </motion.div>
           </motion.div>
 
@@ -563,7 +416,7 @@ export default function MerchantDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {DEMO_DATA.recentBookings.map((booking) => (
+                  {dashboardData.recentBookings.map((booking) => (
                     <motion.tr
                       key={booking.id}
                       variants={itemVariants}
@@ -606,7 +459,7 @@ export default function MerchantDashboardPage() {
                 </tbody>
               </motion.table>
             </div>
-            {DEMO_DATA.recentBookings.length === 0 && (
+            {dashboardData.recentBookings.length === 0 && (
               <div className="px-6 py-12 text-center">
                 <p className="text-slate-500">No bookings yet. Start booking for your clients!</p>
               </div>

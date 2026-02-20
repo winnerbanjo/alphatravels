@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAmadeusClient } from '@/src/lib/amadeus';
+import { success, error } from '@/src/lib/api-response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,99 +15,44 @@ export async function GET(request: NextRequest) {
     const children = searchParams.get('children') || '0';
     const infants = searchParams.get('infants') || '0';
 
-    // Validate required parameters
     if (!origin || !destination || !departureDate) {
-      return NextResponse.json(
-        {
-          error: 'Missing required parameters',
-          message: 'Origin, destination, and departureDate are required',
-        },
-        { status: 400 }
-      );
+      return error('Origin, destination, and departureDate are required', 400);
     }
-
-    // Validate IATA codes (3 letters)
     if (!/^[A-Z]{3}$/i.test(origin) || !/^[A-Z]{3}$/i.test(destination)) {
-      return NextResponse.json(
-        {
-          error: 'Invalid IATA code',
-          message: 'Origin and destination must be valid 3-letter IATA codes',
-        },
-        { status: 400 }
-      );
+      return error('Origin and destination must be valid 3-letter IATA codes', 400);
     }
-
-    // Validate date format (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(departureDate)) {
-      return NextResponse.json(
-        {
-          error: 'Invalid date format',
-          message: 'Date must be in YYYY-MM-DD format',
-        },
-        { status: 400 }
-      );
+      return error('Date must be in YYYY-MM-DD format', 400);
     }
 
     const amadeus = getAmadeusClient();
-    
-    // Handle missing Amadeus client (build-time safety)
     if (!amadeus) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Amadeus API not configured',
-          message: 'Flight search is temporarily unavailable. Please try again later.',
-        },
-        { status: 503 }
-      );
+      return error('Flight search is temporarily unavailable. Please try again later.', 503);
     }
 
-    // Build request parameters
-    const params: any = {
+    const params: Record<string, string | number> = {
       originLocationCode: origin.toUpperCase(),
       destinationLocationCode: destination.toUpperCase(),
-      departureDate: departureDate,
+      departureDate,
       adults: parseInt(adults, 10),
       children: parseInt(children, 10),
       infants: parseInt(infants, 10),
       currencyCode: 'USD',
-      max: 10, // Limit results to 10 offers
+      max: 10,
     };
+    if (returnDate && dateRegex.test(returnDate)) params.returnDate = returnDate;
 
-    // Add return date if provided
-    if (returnDate && dateRegex.test(returnDate)) {
-      params.returnDate = returnDate;
-    }
-
-    // Call Amadeus API
-    const response = await amadeus.shopping.flightOffersSearch.get(params);
-
-    return NextResponse.json({
-      success: true,
+    const response = await amadeus.shopping.flightOffersSearch.get(params as Parameters<typeof amadeus.shopping.flightOffersSearch.get>[0]);
+    return success({
       data: response.data,
       meta: response.result?.meta,
     });
-  } catch (error: any) {
-    console.error('Amadeus API Error:', error);
-
-    // Handle Amadeus API errors
-    if (error.response) {
-      return NextResponse.json(
-        {
-          error: 'Amadeus API Error',
-          message: error.response.data?.errors?.[0]?.detail || error.message,
-        },
-        { status: error.response.status || 500 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Internal Server Error',
-        message: error.message || 'An unexpected error occurred',
-      },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error('Amadeus API Error:', err);
+    const msg = err && typeof err === 'object' && 'response' in err
+      ? (err as { response?: { data?: { errors?: Array<{ detail?: string }> }; status?: number } }).response?.data?.errors?.[0]?.detail
+      : null;
+    return error(msg || (err instanceof Error ? err.message : 'An unexpected error occurred'), 500);
   }
 }

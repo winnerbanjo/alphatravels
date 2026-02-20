@@ -1,96 +1,45 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
+import { connectDb } from '@/src/lib/db';
+import { Order } from '@/src/models/Order';
+import { success, error } from '@/src/lib/api-response';
 
-// Mock orders database - In production, use Prisma
-// This would be shared with /api/orders/create/route.ts
-let orders: any[] = [];
+const VALID_STATUSES = ['Pending', 'Confirmed', 'Paid', 'Cancelled'];
 
-// PATCH - Update order status
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const orderId = id;
+    const { id: orderId } = await params;
     const body = await request.json();
     const { status, action } = body;
 
-    if (!status && !action) {
-      return NextResponse.json(
-        {
-          error: 'Missing required parameters',
-          message: 'status or action is required',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Determine status based on action
     let newStatus = status;
-    if (action === 'confirm') {
-      newStatus = 'Confirmed';
-    } else if (action === 'cancel') {
-      newStatus = 'Cancelled';
-    } else if (action === 'paid') {
-      newStatus = 'Paid';
+    if (action === 'confirm') newStatus = 'Confirmed';
+    else if (action === 'cancel') newStatus = 'Cancelled';
+    else if (action === 'paid') newStatus = 'Paid';
+
+    if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
+      return error(`status or action required; status must be one of: ${VALID_STATUSES.join(', ')}`, 400);
     }
 
-    // Validate status
-    const validStatuses = ['Pending', 'Confirmed', 'Paid', 'Cancelled'];
-    if (!validStatuses.includes(newStatus)) {
-      return NextResponse.json(
-        {
-          error: 'Invalid status',
-          message: `Status must be one of: ${validStatuses.join(', ')}`,
-        },
-        { status: 400 }
-      );
+    await connectDb();
+    const update: Record<string, unknown> = { status: newStatus, updatedAt: new Date() };
+    if (newStatus === 'Paid') update.paymentStatus = 'paid';
+    const order = await Order.findByIdAndUpdate(orderId, update, { new: true }).lean();
+
+    if (!order) {
+      return error('Order not found', 404);
     }
 
-    // Find and update order
-    // In production: const order = await prisma.order.findUnique({ where: { id: orderId } });
-    const orderIndex = orders.findIndex((o) => o.id === orderId);
-
-    if (orderIndex === -1) {
-      return NextResponse.json(
-        {
-          error: 'Order not found',
-          message: `Order with ID ${orderId} does not exist`,
-        },
-        { status: 404 }
-      );
-    }
-
-    orders[orderIndex] = {
-      ...orders[orderIndex],
-      status: newStatus,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const updatedOrder = orders[orderIndex];
-
-    // Simulate email notification to customer
-    // In production: await sendEmail({
-    //   to: updatedOrder.customerInfo.email,
-    //   template: 'order-status-update',
-    //   data: { orderId, status: newStatus, order: updatedOrder }
-    // });
-
-    return NextResponse.json({
-      success: true,
-      order: updatedOrder,
-      message: `Order status updated to ${newStatus}. Email notification sent.`,
+    return success({
+      order: { ...order, id: (order as { _id: unknown })._id.toString() },
+      message: `Order status updated to ${newStatus}.`,
     });
-  } catch (error: any) {
-    console.error('Order status update error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to update order status',
-        message: error.message || 'An unexpected error occurred',
-      },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error('Order status update error:', err);
+    return error(err instanceof Error ? err.message : 'Update failed', 500);
   }
 }

@@ -1,106 +1,68 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-
-// Mock database - In production, this would connect to a real database
-// For now, we'll use in-memory storage (would be replaced with Prisma/PostgreSQL)
-// Note: In a real application, this would be a shared database module
-let orders: any[] = [];
-
-// Export orders array for use in update-status route
-// In production, use a proper database connection
-export { orders };
+import { connectDb } from '@/src/lib/db';
+import { Order } from '@/src/models/Order';
+import { success, error } from '@/src/lib/api-response';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { type, orderData, customerInfo, totalPrice } = body;
 
-    // Validate required parameters
-    if (!type || !orderData || !customerInfo || !totalPrice) {
-      return NextResponse.json(
-        {
-          error: 'Missing required parameters',
-          message: 'type, orderData, customerInfo, and totalPrice are required',
-        },
-        { status: 400 }
-      );
+    if (!type || !orderData || !customerInfo || totalPrice == null) {
+      return error('type, orderData, customerInfo, and totalPrice are required', 400);
     }
 
-    // Extract booking source and merchant_id from request
-    const bookingSource = body.bookingSource || 'ADMIN_DIRECT'; // 'ADMIN_DIRECT' or 'MERCHANT_MANUAL'
-    const merchantId = body.merchantId || null;
+    const bookingSource = body.bookingSource || 'ADMIN_DIRECT';
+    const merchantId = body.merchantId ?? null;
 
-    // Create order record
-    const order = {
-      id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type, // 'hotel', 'car', 'shortlet'
+    await connectDb();
+    const amount = parseFloat(String(totalPrice));
+    const order = await Order.create({
+      type,
       orderData,
       customerInfo,
-      totalPrice: parseFloat(totalPrice),
-      status: 'Pending', // 'Pending', 'Confirmed', 'Paid'
-      bookingSource, // 'ADMIN_DIRECT' or 'MERCHANT_MANUAL'
-      merchantId, // Merchant ID if booking came from merchant
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      totalPrice: amount,
+      amount,
+      status: 'Pending',
+      paymentStatus: 'pending',
+      pnr: body.pnr ?? undefined,
+      bookingSource,
+      merchantId,
+    });
 
-    // In production, save to database
-    // await prisma.order.create({ data: order });
-    orders.push(order);
-
-    return NextResponse.json({
-      success: true,
-      order,
+    const doc = order.toObject();
+    return success({
+      order: {
+        ...doc,
+        id: doc._id.toString(),
+      },
       message: 'Order created successfully',
     });
-  } catch (error: any) {
-    console.error('Order creation error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to create order',
-        message: error.message || 'An unexpected error occurred',
-      },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error('Order creation error:', err);
+    return error(err instanceof Error ? err.message : 'Order creation failed', 500);
   }
 }
 
-// GET endpoint to retrieve orders (for merchant dashboard)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // Filter by type: 'hotel', 'car', 'shortlet'
-    const status = searchParams.get('status'); // Filter by status
+    const type = searchParams.get('type');
+    const status = searchParams.get('status');
 
-    let filteredOrders = [...orders];
+    await connectDb();
+    const filter: Record<string, unknown> = {};
+    if (type) filter.type = type;
+    if (status) filter.status = status;
 
-    if (type) {
-      filteredOrders = filteredOrders.filter((order) => order.type === type);
-    }
+    const orders = await Order.find(filter).sort({ createdAt: -1 }).lean();
+    const list = orders.map((o) => ({ ...o, id: (o as { _id: unknown })._id.toString() }));
 
-    if (status) {
-      filteredOrders = filteredOrders.filter((order) => order.status === status);
-    }
-
-    // Sort by createdAt (newest first)
-    filteredOrders.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    return NextResponse.json({
-      success: true,
-      orders: filteredOrders,
-      total: filteredOrders.length,
-    });
-  } catch (error: any) {
-    console.error('Order retrieval error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to retrieve orders',
-        message: error.message || 'An unexpected error occurred',
-      },
-      { status: 500 }
-    );
+    return success({ orders: list, total: list.length });
+  } catch (err) {
+    console.error('Order retrieval error:', err);
+    return error(err instanceof Error ? err.message : 'Order retrieval failed', 500);
   }
 }

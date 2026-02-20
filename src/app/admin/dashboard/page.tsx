@@ -4,110 +4,29 @@ export const dynamic = 'force-dynamic';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, Users, Clock, Eye, ArrowRight, CheckCircle, XCircle, Zap, Plus } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import Image from 'next/image';
 import AdminSidebar from '@/src/components/admin/AdminSidebar';
 import ManualBookingForm from '@/src/components/admin/ManualBookingForm';
 
-// DEMO_DATA - Consolidated mock database
-const DEMO_DATA = {
-  stats: {
-    networkVolume: '₦140,000,000',
-    activeMerchants: 24,
-    pendingApprovals: 3,
-  },
-  merchants: [
-    {
-      id: 'MERCH-001',
-      name: 'Oyekunle Ade',
-      email: 'oyekunle@alpha.com',
-      totalSales: '₦8,450,000',
-      bookings: 67,
-      status: 'Active',
-      joinDate: '2024-01-15',
-      avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop',
-    },
-    {
-      id: 'MERCH-002',
-      name: 'Chioma Nwosu',
-      email: 'chioma@alpha.com',
-      totalSales: '₦12,200,000',
-      bookings: 98,
-      status: 'Active',
-      joinDate: '2023-11-20',
-      avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop',
-    },
-    {
-      id: 'MERCH-003',
-      name: 'Emeka Okoro',
-      email: 'emeka@alpha.com',
-      totalSales: '₦6,800,000',
-      bookings: 54,
-      status: 'Active',
-      joinDate: '2024-03-10',
-      avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop',
-    },
-    {
-      id: 'MERCH-004',
-      name: 'Folake Adeyemi',
-      email: 'folake@alpha.com',
-      totalSales: '₦9,100,000',
-      bookings: 72,
-      status: 'Active',
-      joinDate: '2024-02-05',
-      avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop',
-    },
-    {
-      id: 'MERCH-005',
-      name: 'Tunde Adebayo',
-      email: 'tunde@alpha.com',
-      totalSales: '₦15,600,000',
-      bookings: 124,
-      status: 'Active',
-      joinDate: '2023-09-12',
-      avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop',
-    },
-  ],
-  pendingApprovals: [
-    {
-      id: 'PEND-001',
-      name: 'Amina Bello',
-      email: 'amina@alpha.com',
-      submittedDate: '2026-01-20',
-    },
-    {
-      id: 'PEND-002',
-      name: 'David Okonkwo',
-      email: 'david@alpha.com',
-      submittedDate: '2026-01-22',
-    },
-    {
-      id: 'PEND-003',
-      name: 'Blessing Eze',
-      email: 'blessing@alpha.com',
-      submittedDate: '2026-01-23',
-    },
-  ],
-  recentBookings: [
-    { id: 'TICK-001', merchant: 'Oyekunle Ade', booking: 'LOS → LHR', amount: '₦900,000', time: '2m ago' },
-    { id: 'TICK-002', merchant: 'Chioma Nwosu', booking: 'DXB → LOS', amount: '₦770,000', time: '5m ago' },
-    { id: 'TICK-003', merchant: 'Emeka Okoro', booking: 'LOS → JFK', amount: '₦1,040,000', time: '8m ago' },
-    { id: 'TICK-004', merchant: 'Folake Adeyemi', booking: 'CDG → LOS', amount: '₦824,000', time: '12m ago' },
-    { id: 'TICK-005', merchant: 'Tunde Adebayo', booking: 'LOS → YYZ', amount: '₦975,000', time: '15m ago' },
-  ],
-  topPerformers: [
-    { name: 'Tunde Adebayo', sales: '₦15.6M', bookings: 124, avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop' },
-    { name: 'Chioma Nwosu', sales: '₦12.2M', bookings: 98, avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop' },
-    { name: 'Folake Adeyemi', sales: '₦9.1M', bookings: 72, avatar: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=200&auto=format&fit=crop' },
-  ],
-  revenueData: [
-    { month: 'Oct', revenue: 12 },
-    { month: 'Nov', revenue: 15 },
-    { month: 'Dec', revenue: 18 },
-    { month: 'Jan', revenue: 22 },
-  ],
+type DashboardData = {
+  stats: { networkVolume: string; activeMerchants: number; pendingApprovals: number };
+  merchants: Array<{ id: string; name: string; email: string; totalSales: string; bookings: number; status: string; joinDate: string; avatar: string }>;
+  pendingApprovals: Array<{ id: string; name: string; email: string; submittedDate: string }>;
+  recentBookings: Array<{ id: string; merchant: string; booking: string; amount: string; time: string }>;
+  topPerformers: Array<{ name: string; sales: string; bookings: number; avatar: string }>;
+  revenueData: Array<{ month: string; revenue: number }>;
+};
+
+const EMPTY_DASHBOARD: DashboardData = {
+  stats: { networkVolume: '₦0', activeMerchants: 0, pendingApprovals: 0 },
+  merchants: [],
+  pendingApprovals: [],
+  recentBookings: [],
+  topPerformers: [],
+  revenueData: [],
 };
 
 // Framer Motion Variants
@@ -136,6 +55,23 @@ const itemVariants = {
 
 export default function AdminDashboardPage() {
   const [showManualBooking, setShowManualBooking] = useState(false);
+  const [dashboard, setDashboard] = useState<DashboardData>(EMPTY_DASHBOARD);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/dashboard')
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled || !json.success) return;
+        setDashboard(json.data || EMPTY_DASHBOARD);
+      })
+      .catch(() => setDashboard(EMPTY_DASHBOARD))
+      .finally(() => setLoading(false));
+    return () => { cancelled = true; };
+  }, []);
+
+  const data = dashboard;
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -211,7 +147,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <p className="text-sm font-medium text-slate-600 mb-2 tracking-tight">Network Volume</p>
-              <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.stats.networkVolume}</p>
+              <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{data.stats.networkVolume}</p>
               <p className="text-xs text-slate-500 mt-2 tracking-tight">Total platform revenue</p>
             </motion.div>
 
@@ -227,7 +163,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <p className="text-sm font-medium text-slate-600 mb-2 tracking-tight">Active Merchants</p>
-              <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.stats.activeMerchants}</p>
+              <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{data.stats.activeMerchants}</p>
               <p className="text-xs text-slate-500 mt-2 tracking-tight">Verified partners</p>
             </motion.div>
 
@@ -243,7 +179,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <p className="text-sm font-medium text-slate-600 mb-2 tracking-tight">Pending Approvals</p>
-              <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{DEMO_DATA.stats.pendingApprovals}</p>
+              <p className="text-4xl font-medium text-[#1A1830] tracking-tight">{data.stats.pendingApprovals}</p>
               <p className="text-xs text-slate-500 mt-2 tracking-tight">Awaiting review</p>
             </motion.div>
           </motion.div>
@@ -283,7 +219,7 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {DEMO_DATA.merchants.map((merchant, index) => (
+                      {data.merchants.map((merchant, index) => (
                         <motion.tr
                           key={merchant.id}
                           initial={{ opacity: 0, x: -20 }}
@@ -341,18 +277,18 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="p-8">
                   <div className="flex items-end justify-between gap-4 h-64">
-                    {DEMO_DATA.revenueData.map((data, index) => (
-                      <div key={data.month} className="flex-1 flex flex-col items-center gap-3">
+                    {data.revenueData.map((rev, index) => (
+                      <div key={rev.month} className="flex-1 flex flex-col items-center gap-3">
                         <div className="relative w-full flex items-end justify-center" style={{ height: '200px' }}>
                           <motion.div
                             initial={{ height: 0 }}
-                            animate={{ height: `${(data.revenue / 22) * 100}%` }}
+                            animate={{ height: `${Math.min(100, (rev.revenue / 22) * 100)}%` }}
                             transition={{ duration: 0.6, delay: index * 0.1 }}
                             className="w-full bg-gradient-to-t from-[#1A1830] to-[#2A2540] rounded-t-xl min-h-[40px]"
                           />
                         </div>
-                        <span className="text-xs font-medium text-slate-600 tracking-tight">{data.month}</span>
-                        <span className="text-xs text-slate-500 tracking-tight">₦{data.revenue}M</span>
+                        <span className="text-xs font-medium text-slate-600 tracking-tight">{rev.month}</span>
+                        <span className="text-xs text-slate-500 tracking-tight">₦{rev.revenue}M</span>
                       </div>
                     ))}
                   </div>
@@ -373,7 +309,7 @@ export default function AdminDashboardPage() {
                   <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">Merchant Approval Queue</h2>
                 </div>
                 <div className="p-6 space-y-4">
-                  {DEMO_DATA.pendingApprovals.map((approval) => (
+                  {data.pendingApprovals.map((approval) => (
                     <div
                       key={approval.id}
                       className="p-4 rounded-xl bg-white/50 border border-white/20"
@@ -411,7 +347,7 @@ export default function AdminDashboardPage() {
                   <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">Top Performing Agents</h2>
                 </div>
                 <div className="p-6 space-y-4">
-                  {DEMO_DATA.topPerformers.map((performer, index) => (
+                  {data.topPerformers.map((performer, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-4 p-4 rounded-xl bg-white/50 border border-white/20"
@@ -450,7 +386,7 @@ export default function AdminDashboardPage() {
                   <h2 className="text-2xl font-medium text-[#1A1830] tracking-tight">Live Network Feed</h2>
                 </div>
                 <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto">
-                  {DEMO_DATA.recentBookings.map((booking) => (
+                  {data.recentBookings.map((booking) => (
                     <div
                       key={booking.id}
                       className="p-3 rounded-xl bg-white/50 border border-white/20"

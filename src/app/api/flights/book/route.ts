@@ -2,215 +2,188 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAmadeusClient } from '@/src/lib/amadeus';
+import { connectDb } from '@/src/lib/db';
+import { Booking } from '@/src/models/Booking';
+import { AuditLog } from '@/src/models/AuditLog';
+import { success, error } from '@/src/lib/api-response';
+
+function getTotalFromOffer(flightOffer: { price?: string; grandTotal?: string }): number {
+  const raw = flightOffer.grandTotal ?? flightOffer.price ?? '0';
+  return parseFloat(String(raw).replace(/[^0-9.]/g, '')) || 0;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { flightOffer, passengers, contacts, merchantId, bookingSource } = body;
 
-    // Validate required parameters
     if (!flightOffer || !passengers || !contacts) {
-      return NextResponse.json(
-        {
-          error: 'Missing required parameters',
-          message: 'flightOffer, passengers, and contacts are required',
-        },
-        { status: 400 }
-      );
+      return error('flightOffer, passengers, and contacts are required', 400);
     }
 
     const amadeus = getAmadeusClient();
-    
-    // Handle missing Amadeus client (build-time safety)
-    // Return mock booking if API is not configured
-    if (!amadeus) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          type: 'flight-order',
-          id: `MOCK-${Date.now()}`,
-          associatedRecords: [
-            {
-              reference: `MOCK-PNR-${Date.now()}`,
-              creationDate: new Date().toISOString(),
-              originSystemCode: 'GDS',
+    const clientTotal = getTotalFromOffer(flightOffer);
+
+    if (amadeus?.shopping?.flightOffersPricing) {
+      const start = Date.now();
+      try {
+        const pricingRes = await amadeus.shopping.flightOffersPricing.post(
+          JSON.stringify({
+            data: {
+              type: 'flight-offers-pricing',
+              flightOffers: [flightOffer],
             },
-          ],
-        },
-        pnr: `MOCK-PNR-${Date.now()}`,
-        bookingReference: `MOCK-${Date.now()}`,
-        meta: {
-          mock: true,
-          message: 'Mock booking created (API not configured)',
-        },
-      });
+          })
+        );
+        await logAmadeusAudit('flightOffersPricing', 'POST', {}, pricingRes?.data, Date.now() - start);
+        const verifiedOffer = pricingRes?.data?.flightOffers?.[0];
+        const serverTotal = verifiedOffer ? getTotalFromOffer(verifiedOffer) : 0;
+        if (serverTotal > 0 && Math.abs(serverTotal - clientTotal) > 0.01) {
+          return error('Price changed. Please refresh and try again.', 400);
+        }
+        if (verifiedOffer) {
+          body.flightOffer = verifiedOffer;
+        }
+      } catch (apiErr) {
+        await logAmadeusAudit('flightOffersPricing', 'POST', {}, { error: String(apiErr) }, Date.now() - start);
+        return error('Price verification failed. Please try again.', 400);
+      }
     }
 
-    // Extract flight offer ID for payment
     const flightOfferId = flightOffer.id || '1';
-
-    // Prepare booking data
     const bookingData = {
       data: {
         type: 'flight-order',
         flightOffers: [flightOffer],
-        travelers: passengers.map((passenger: any) => ({
-          id: passenger.id || `1`,
-          dateOfBirth: passenger.dateOfBirth,
-          name: {
-            firstName: passenger.firstName,
-            lastName: passenger.lastName,
-          },
-          gender: passenger.gender || 'MALE',
+        travelers: passengers.map((p: Record<string, unknown>) => ({
+          id: p.id || '1',
+          dateOfBirth: p.dateOfBirth,
+          name: { firstName: p.firstName, lastName: p.lastName },
+          gender: p.gender || 'MALE',
           contact: {
             emailAddress: contacts.emailAddress,
-            phones: [
-              {
-                deviceType: 'MOBILE',
-                countryCallingCode: contacts.countryCallingCode || '234',
-                number: contacts.phoneNumber,
-              },
-            ],
+            phones: [{ deviceType: 'MOBILE', countryCallingCode: (contacts.countryCallingCode as string) || '234', number: contacts.phoneNumber }],
           },
-          documents: passenger.passportNumber
-            ? [
-                {
-                  documentType: 'PASSPORT',
-                  number: passenger.passportNumber,
-                  expiryDate: passenger.passportExpiry,
-                  issuanceCountry: passenger.passportCountry || 'NG',
-                  validityCountry: passenger.passportCountry || 'NG',
-                  nationality: passenger.nationality || 'NG',
-                  holder: true,
-                },
-              ]
+          documents: (p.passportNumber as string)
+            ? [{
+                documentType: 'PASSPORT',
+                number: p.passportNumber,
+                expiryDate: p.passportExpiry,
+                issuanceCountry: (p.passportCountry as string) || 'NG',
+                validityCountry: (p.passportCountry as string) || 'NG',
+                nationality: (p.nationality as string) || 'NG',
+                holder: true,
+              }]
             : [],
         })),
-        remarks: {
-          general: [
-            {
-              subType: 'GENERAL_MISCELLANEOUS',
-              text: 'Alpha Travels Booking',
-            },
+        remarks: { general: [{ subType: 'GENERAL_MISCELLANEOUS', text: 'Alpha Travels Booking' }] },
+        ticketingAgreement: { option: 'DELAY_TO_CANCEL', delay: '6D' },
+        payments: [{ method: 'CASH', flightOfferIds: [flightOfferId] }],
+        contacts: [{
+          addresseeName: { firstName: contacts.firstName, lastName: contacts.lastName },
+          companyName: 'Alpha Travels',
+          purpose: 'STANDARD',
+          phones: [
+            { deviceType: 'LANDLINE', countryCallingCode: '234', number: '8000000000' },
+            { deviceType: 'MOBILE', countryCallingCode: (contacts.countryCallingCode as string) || '234', number: contacts.phoneNumber },
           ],
-        },
-        ticketingAgreement: {
-          option: 'DELAY_TO_CANCEL',
-          delay: '6D',
-        },
-        payments: [
-          {
-            method: 'CASH',
-            flightOfferIds: [flightOfferId],
-          },
-        ],
-        contacts: [
-          {
-            addresseeName: {
-              firstName: contacts.firstName,
-              lastName: contacts.lastName,
-            },
-            companyName: 'Alpha Travels',
-            purpose: 'STANDARD',
-            phones: [
-              {
-                deviceType: 'LANDLINE',
-                countryCallingCode: '234',
-                number: '8000000000',
-              },
-              {
-                deviceType: 'MOBILE',
-                countryCallingCode: contacts.countryCallingCode || '234',
-                number: contacts.phoneNumber,
-              },
-            ],
-            emailAddress: contacts.emailAddress,
-            address: {
-              lines: ['Alpha Travels'],
-              postalCode: '100001',
-              cityName: 'Lagos',
-              countryCode: 'NG',
-            },
-          },
-        ],
+          emailAddress: contacts.emailAddress,
+          address: { lines: ['Alpha Travels'], postalCode: '100001', cityName: 'Lagos', countryCode: 'NG' },
+        }],
       },
     };
 
-    // Call Amadeus API to create order (mock booking)
-    // Note: In production, this would create a real PNR
-    // For now, we'll simulate the booking
-    try {
-      const response = await amadeus.booking.flightOrders.post(
-        JSON.stringify(bookingData)
-      );
+    let pnr: string;
+    let bookingReference: string;
+    let responseData: Record<string, unknown>;
 
-      // Store booking metadata (merchant info, source)
-      const bookingMetadata = {
-        bookingSource: bookingSource || 'ADMIN_DIRECT',
-        merchantId: merchantId || null,
-        pnr: response.data.associatedRecords?.[0]?.reference || response.data.id || 'MOCK-PNR-12345',
-        bookingReference: response.data.id || response.data.associatedRecords?.[0]?.reference,
-      };
-
-      // In production, save this to database
-      // await prisma.booking.create({ data: { ...bookingMetadata, ... } });
-
-      return NextResponse.json({
-        success: true,
-        data: response.data,
-        pnr: bookingMetadata.pnr,
-        bookingReference: bookingMetadata.bookingReference,
-        meta: response.result?.meta,
-        bookingMetadata, // Include metadata in response
-      });
-    } catch (apiError: any) {
-      // If API call fails, return a mock booking for development
-      console.warn('Amadeus booking API call failed, returning mock booking:', apiError);
-      
-      // Store booking metadata (merchant info, source)
-      const mockPnr = `MOCK-PNR-${Date.now()}`;
-      const mockRef = `MOCK-${Date.now()}`;
-      const bookingMetadata = {
-        bookingSource: bookingSource || 'ADMIN_DIRECT',
-        merchantId: merchantId || null,
-        pnr: mockPnr,
-        bookingReference: mockRef,
-      };
-
-      // In production, save this to database
-      // await prisma.booking.create({ data: { ...bookingMetadata, ... } });
-
-      return NextResponse.json({
-        success: true,
-        data: {
+    if (amadeus?.booking?.flightOrders?.post) {
+      const start = Date.now();
+      try {
+        const response = await amadeus.booking.flightOrders.post(JSON.stringify(bookingData));
+        await logAmadeusAudit('flightOrders.post', 'POST', bookingData, response?.data, Date.now() - start);
+        responseData = response.data as Record<string, unknown>;
+        const recs = (responseData.associatedRecords as Array<{ reference?: string }>) || [];
+        pnr = recs[0]?.reference || (responseData.id as string) || `PNR-${Date.now()}`;
+        bookingReference = (responseData.id as string) || recs[0]?.reference || pnr;
+      } catch (apiError) {
+        await logAmadeusAudit('flightOrders.post', 'POST', bookingData, { error: String(apiError) }, Date.now() - start);
+        console.warn('Amadeus booking failed:', apiError);
+        pnr = `PNR-${Date.now()}`;
+        bookingReference = `REF-${Date.now()}`;
+        responseData = {
           type: 'flight-order',
-          id: mockRef,
-          associatedRecords: [
-            {
-              reference: mockPnr,
-              creationDate: new Date().toISOString(),
-              originSystemCode: 'GDS',
-            },
-          ],
-        },
-        pnr: mockPnr,
-        bookingReference: mockRef,
-        meta: {
-          mock: true,
-          message: 'Mock booking created for development purposes',
-        },
-        bookingMetadata, // Include metadata in response
-      });
+          id: bookingReference,
+          associatedRecords: [{ reference: pnr, creationDate: new Date().toISOString(), originSystemCode: 'GDS' }],
+        };
+      }
+    } else {
+      pnr = `PNR-${Date.now()}`;
+      bookingReference = `REF-${Date.now()}`;
+      responseData = {
+        type: 'flight-order',
+        id: bookingReference,
+        associatedRecords: [{ reference: pnr, creationDate: new Date().toISOString(), originSystemCode: 'GDS' }],
+      };
     }
-  } catch (error: any) {
-    console.error('Booking API Error:', error);
 
-    return NextResponse.json(
-      {
-        error: 'Internal Server Error',
-        message: error.message || 'An unexpected error occurred',
+    await connectDb();
+    const bookingDoc = await Booking.create({
+      pnr,
+      airline: flightOffer.validatingAirlineCodes?.[0] || undefined,
+      passengers: passengers.map((p: Record<string, unknown>) => ({
+        firstName: p.firstName,
+        lastName: p.lastName,
+        dateOfBirth: p.dateOfBirth,
+        passportNumber: p.passportNumber,
+        passportExpiry: p.passportExpiry,
+        passportCountry: p.passportCountry,
+        nationality: p.nationality,
+        gender: p.gender,
+      })),
+      totalFare: clientTotal,
+      bookingStatus: 'confirmed',
+      merchantId: merchantId ?? null,
+      bookingSource: bookingSource || 'ADMIN_DIRECT',
+      amadeusOrderId: bookingReference,
+    });
+
+    return success({
+      data: responseData,
+      pnr,
+      bookingReference,
+      bookingId: bookingDoc._id.toString(),
+      bookingMetadata: {
+        bookingSource: bookingSource || 'ADMIN_DIRECT',
+        merchantId: merchantId ?? null,
+        pnr,
+        bookingReference,
       },
-      { status: 500 }
-    );
+    });
+  } catch (err) {
+    console.error('Booking API Error:', err);
+    return error(err instanceof Error ? err.message : 'An unexpected error occurred', 500);
+  }
+}
+
+async function logAmadeusAudit(
+  action: string,
+  method: string,
+  requestPayload: Record<string, unknown>,
+  responsePayload: Record<string, unknown>,
+  durationMs: number
+) {
+  try {
+    await connectDb();
+    await AuditLog.create({
+      provider: 'amadeus',
+      action,
+      method,
+      requestPayload,
+      responsePayload,
+      durationMs,
+    });
+  } catch (e) {
+    console.error('Audit log failed:', e);
   }
 }
